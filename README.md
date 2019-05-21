@@ -1,2 +1,2 @@
 # WebSocketLuaClusterServer
-WebSocket - Lua - ClusterServer
+Communication framework under Lua on WebSocket server.
