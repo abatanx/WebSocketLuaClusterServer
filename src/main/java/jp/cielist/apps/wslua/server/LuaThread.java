@@ -8,6 +8,7 @@
 package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
+import org.luaj.vm2.LuaValue;
 
 import java.io.IOException;
 
@@ -33,7 +34,7 @@ public class LuaThread extends Thread
 		super.run();
 		try
 		{
-			luaEnv.run(luaFilename, new String[0]);
+			luaEnv.run(luaFilename, LuaValue.NIL);
 		}
 		catch (IOException e)
 		{

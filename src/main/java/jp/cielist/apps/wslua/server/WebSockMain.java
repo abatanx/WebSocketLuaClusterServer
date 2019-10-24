@@ -45,17 +45,30 @@ public class WebSockMain
 		//Log.debug("Received from %s", session.getRemoteAddress().toString());
 		Log.receiveLog(message);
 
-		String[] parsed = ProtocolString.decode(message);
+//		String[] parsed = ProtocolString.decode(message);
+
 		try
 		{
-			if( parsed.length>0 )
+			JsonToLuaObject jsonLua = new JsonToLuaObject(message);
+
+			String rootKey = jsonLua.getRootKey();
+			if( rootKey != null )
 			{
-				if( parsed[0].matches("^[0-9A-Za-z]+$") )
+				if( rootKey.matches("^[0-9A-Za-z]+$") )
 				{
-					String fileName = "_" + parsed[0].toLowerCase() + ".lua";
-					lua.run(fileName, parsed);
+					String fileName = "_" + rootKey.toLowerCase() + ".lua";
+					lua.run(fileName, jsonLua.getRootValue() );
 				}
 			}
+//
+//			if( parsed.length>0 )
+//			{
+//				if( parsed[0].matches("^[0-9A-Za-z]+$") )
+//				{
+//					String fileName = "_" + parsed[0].toLowerCase() + ".lua";
+//					lua.run(fileName, parsed);
+//				}
+//			}
 		}
 		catch (IOException e)
 		{

@@ -101,16 +101,14 @@ public class LuaEnv implements ClientManagerDelegate
 		}
 	}
 
-	synchronized public void run(String luaFileName, String[] parsed) throws IOException
+	synchronized public void run(String luaFileName, LuaValue value) throws IOException
 	{
 		LuaTable proto = LuaValue.tableOf();
-		for(int i=0; i<parsed.length; i++) proto.set(i+1, LuaValue.valueOf(parsed[i]));
-		luaGlobals.set("proto", proto);
+		luaGlobals.set("in", value);
 
 		try
 		{
 			LuaValue chunk = luaGlobals.loadfile(CSConfig.settings.luaDir + luaFileName);
-
 			if( startChunk != LuaValue.NIL ) startChunk.call();
 			chunk.call();
 			if( endChunk != LuaValue.NIL ) endChunk.call();
