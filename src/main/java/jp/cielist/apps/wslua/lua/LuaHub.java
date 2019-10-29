@@ -16,7 +16,7 @@ import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 
-public class LuaHub extends TwoArgFunction
+public class LuaHub extends ZeroArgFunction
 {
 	private Session session;
 
@@ -26,12 +26,11 @@ public class LuaHub extends TwoArgFunction
 		this.session = session;
 	}
 
-	public LuaValue call(LuaValue modname, LuaValue env)
+	public LuaValue call()
 	{
 		LuaValue library = tableOf();
 		library.set("new", new _new(this.session));
 		library.set("hubs", new hubs(this.session));
-		env.set("Hub", library);
 		return library;
 	}
 

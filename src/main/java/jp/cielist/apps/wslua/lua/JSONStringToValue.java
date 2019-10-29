@@ -1,5 +1,6 @@
-package jp.cielist.apps.wslua.server;
+package jp.cielist.apps.wslua.lua;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.luaj.vm2.LuaValue;
@@ -9,42 +10,21 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JsonToLuaObject
+public class JSONStringToValue
 {
-	private LuaValue result = LuaValue.NIL;
+	protected LuaValue result = LuaValue.NIL;
 
-	private LuaValue rootKey   = LuaValue.NIL;
-	private LuaValue rootValue = LuaValue.NIL;
-
-	public JsonToLuaObject(String json) throws IOException
+	public JSONStringToValue(String json)
 	{
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode root = mapper.readTree(json);
-		result  = expand(root);
-
-		int m = 0;
-		LuaValue k = LuaValue.NIL, v = LuaValue.NIL ;
-		rootKey    = LuaValue.NIL;
-		rootValue  = LuaValue.NIL;
-		while( true )
+		try
 		{
-			Varargs n = result.next(k);
-			if( (k = n.arg1()).isnil() ) break;
-			v = n.arg(2);
-
-			if( rootKey.isnil() )
-			{
-				rootKey   = k;
-				rootValue = v;
-			}
-			m ++;
+			JsonNode root = mapper.readTree(json);
+			result  = parse(root);
 		}
-
-		// Number of key = 0 or 2..
-		if( m != 1 )
+		catch(Exception e)
 		{
-			rootKey   = LuaValue.NIL;
-			rootValue = LuaValue.NIL;
+			e.printStackTrace();
 		}
 	}
 
@@ -53,17 +33,7 @@ public class JsonToLuaObject
 		return result;
 	}
 
-	public String getRootKey()
-	{
-		return !rootKey.isnil() && rootKey.isstring() ? rootKey.tojstring() : null;
-	}
-
-	public LuaValue getRootValue()
-	{
-		return rootValue;
-	}
-
-	private LuaValue expand(JsonNode root) throws IOException
+	private LuaValue parse(JsonNode root) throws Exception
 	{
 		switch(root.getNodeType())
 		{
@@ -74,7 +44,7 @@ public class JsonToLuaObject
 				while( it.hasNext() )
 				{
 					Map.Entry<String, JsonNode> obj = it.next();
-					luaObject.set(obj.getKey(), expand(obj.getValue()));
+					luaObject.set(obj.getKey(), parse(obj.getValue()));
 				}
 				return luaObject;
 			}
@@ -86,7 +56,7 @@ public class JsonToLuaObject
 				while( it.hasNext() )
 				{
 					JsonNode elm = it.next();
-					luaObject.set(i++, expand(elm));
+					luaObject.set(i++, parse(elm));
 				}
 				return luaObject;
 			}

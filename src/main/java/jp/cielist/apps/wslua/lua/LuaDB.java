@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
-public class LuaDB extends TwoArgFunction
+public class LuaDB extends ZeroArgFunction
 {
 	static String INTERNAL_VARIABLES = "__VARS__";
 
@@ -53,11 +53,10 @@ public class LuaDB extends TwoArgFunction
 		connections.clear();
 	}
 
-	public LuaValue call(LuaValue modname, LuaValue env)
+	public LuaValue call()
 	{
 		LuaValue library = tableOf();
 		library.set("new", new _new());
-		env.set("DB", library);
 		return library;
 	}
 

@@ -15,21 +15,20 @@ import org.luaj.vm2.lib.*;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
-public class LuaCrypt extends TwoArgFunction
+public class LuaCrypt extends ZeroArgFunction
 {
 	public LuaCrypt()
 	{
 		Log.debug("Activating Crypt module...");
 	}
 
-	public LuaValue call(LuaValue modname, LuaValue env)
+	public LuaValue call()
 	{
 		LuaValue library = tableOf();
 		library.set("challenge", new challenge());
 		library.set("hash", new hash());
 		library.set("passwordHash", new passwordHash());
 		library.set("md5", new md5());
-		env.set("Crypt", library);
 		return library;
 	}
 

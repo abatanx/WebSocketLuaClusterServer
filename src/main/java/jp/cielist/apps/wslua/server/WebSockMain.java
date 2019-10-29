@@ -8,7 +8,8 @@
 package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
-import jp.cielist.apps.wslua.common.ProtocolString;
+import jp.cielist.apps.wslua.lua.JSONStringToProtocol;
+import jp.cielist.apps.wslua.lua.JSONStringToValue;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
@@ -44,31 +45,19 @@ public class WebSockMain
 	synchronized public void onText(String message) {
 		//Log.debug("Received from %s", session.getRemoteAddress().toString());
 		Log.receiveLog(message);
-
-//		String[] parsed = ProtocolString.decode(message);
-
 		try
 		{
-			JsonToLuaObject jsonLua = new JsonToLuaObject(message);
+			JSONStringToProtocol jsonLua = new JSONStringToProtocol(message);
 
 			String rootKey = jsonLua.getRootKey();
 			if( rootKey != null )
 			{
-				if( rootKey.matches("^[0-9A-Za-z]+$") )
+				if( rootKey.matches("^[_0-9A-Za-z]+$") )
 				{
 					String fileName = "_" + rootKey.toLowerCase() + ".lua";
 					lua.run(fileName, jsonLua.getRootValue() );
 				}
 			}
-//
-//			if( parsed.length>0 )
-//			{
-//				if( parsed[0].matches("^[0-9A-Za-z]+$") )
-//				{
-//					String fileName = "_" + parsed[0].toLowerCase() + ".lua";
-//					lua.run(fileName, parsed);
-//				}
-//			}
 		}
 		catch (IOException e)
 		{

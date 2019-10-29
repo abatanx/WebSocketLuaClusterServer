@@ -10,16 +10,16 @@ package jp.cielist.apps.wslua.lua;
 import jp.cielist.apps.wslua.common.Log;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
-import org.luaj.vm2.lib.ZeroArgFunction;
+import org.luaj.vm2.lib.TwoArgFunction;
 
-public class LuaLog extends ZeroArgFunction
+public class LuaJson extends TwoArgFunction
 {
-	public LuaLog()
+	public LuaJson()
 	{
 		Log.debug("Activating Logging module...");
 	}
 
-	public LuaValue call()
+	public LuaValue call(LuaValue modname, LuaValue env)
 	{
 		LuaValue library = tableOf();
 		library.set("info", new log(Log.LOGTYPE_INFO | Log.LOGTYPE_LUA));
@@ -28,6 +28,7 @@ public class LuaLog extends ZeroArgFunction
 		library.set("error", new log(Log.LOGTYPE_ERROR | Log.LOGTYPE_LUA));
 		library.set("fatal", new log(Log.LOGTYPE_FATAL | Log.LOGTYPE_LUA));
 		library.set("debug", new log(Log.LOGTYPE_DEBUG | Log.LOGTYPE_LUA));
+		env.set("Log", library);
 		return library;
 	}
 

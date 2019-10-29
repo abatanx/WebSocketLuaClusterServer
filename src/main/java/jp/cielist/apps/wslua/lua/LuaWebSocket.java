@@ -16,7 +16,7 @@ import org.luaj.vm2.lib.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LuaWebSocket extends TwoArgFunction
+public class LuaWebSocket extends ZeroArgFunction
 {
 	private Session session;
 	public LuaWebSocket(Session session)
@@ -25,11 +25,10 @@ public class LuaWebSocket extends TwoArgFunction
 		this.session = session;
 	}
 
-	public LuaValue call(LuaValue modname, LuaValue env)
+	public LuaValue call()
 	{
 		LuaValue library = tableOf();
 		library.set("new", new _new());
-		env.set("WebSocket", library);
 		return library;
 	}
 
@@ -51,18 +50,15 @@ public class LuaWebSocket extends TwoArgFunction
 			return library;
 		}
 
-		class send extends VarArgFunction
+		class send extends TwoArgFunction
 		{
-			public Varargs invoke(Varargs args)
+			public LuaValue call(LuaValue self, LuaValue object)
 			{
-				ArrayList<String> a = new ArrayList<>();
-				for(int i=1; i<args.narg(); i++) a.add(args.arg(i+1).toString());
-				String encoded = ProtocolString.encode(a.toArray(new String[0]));
-
+				String str = object.tojstring();
 				try
 				{
-					Log.sendLog(encoded);
-					session.getRemote().sendString(encoded);
+					Log.sendLog(str);
+					session.getRemote().sendString(str);
 				}
 				catch(IOException e)
 				{

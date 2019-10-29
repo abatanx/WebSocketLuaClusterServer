@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class LuaTimer extends TwoArgFunction
+public class LuaTimer extends ZeroArgFunction
 {
 	private Timer timer;
 
@@ -32,11 +32,10 @@ public class LuaTimer extends TwoArgFunction
 		timer = null;
 	}
 
-	public LuaValue call(LuaValue modname, LuaValue env)
+	public LuaValue call()
 	{
 		LuaValue library = tableOf();
 		library.set("new", new _new());
-		env.set("Timer", library);
 		return library;
 	}
 

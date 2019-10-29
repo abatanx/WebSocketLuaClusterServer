@@ -26,6 +26,7 @@ public class LuaEnv implements ClientManagerDelegate
 
 	// Lua
 	private Globals luaGlobals;
+	private LuaValue core;
 	private LuaValue initChunk, startChunk, endChunk;
 
 	public LuaDB luaDB;
@@ -50,19 +51,21 @@ public class LuaEnv implements ClientManagerDelegate
 		versions.set("jvm", LuaValue.valueOf(System.getProperty("java.vm.version")));
 
 		LuaValue events = LuaValue.tableOf();
-		events.set("onSessionChanged", LuaValue.NIL);
+		events.set("OnSessionChanged", LuaValue.NIL);
 
-		LuaValue system = LuaValue.tableOf();
-		system.set("versions", versions);
-		system.set("events", events);
-		luaGlobals.set("system", system);
+		core = LuaValue.tableOf();
+		core.set("Versions", versions);
+		core.set("Events", events);
 
-		(new LuaLog()).call(LuaValue.NIL, luaGlobals);
-		(new LuaCrypt()).call(LuaValue.NIL, luaGlobals);
-		(luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call(LuaValue.NIL, luaGlobals);
-		(new LuaWebSocket(session)).call(LuaValue.NIL, luaGlobals);
-		(new LuaHub(session)).call(LuaValue.NIL, luaGlobals);
-		(new LuaTimer()).call(LuaValue.NIL, luaGlobals);
+		core.set("Log",       (new LuaLog()).call());
+		core.set("Crypt",     (new LuaCrypt()).call());
+		core.set("DB",        (luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call());
+		core.set("WebSocket", (new LuaWebSocket(session)).call());
+		core.set("Hub",       (new LuaHub(session)).call());
+		core.set("Timer",     (new LuaTimer()).call());
+		core.set("JSON",      (new LuaJSON()).call());
+
+		luaGlobals.set("Core", core);
 
 		// Stating init.lua
 		String initLuaFilename = CSConfig.settings.luaDir + "init.lua";
@@ -125,10 +128,10 @@ public class LuaEnv implements ClientManagerDelegate
 	@Override
 	public void onSessionChanged()
 	{
-		LuaValue system   = luaGlobals.get("system");
-		LuaValue events   = system.get("events");
-		LuaValue callback = events.get("onSessionChanged");
-		if( callback != LuaValue.NIL ) callback.invoke();
+		LuaValue system   = luaGlobals.get("Core");
+		LuaValue events   = system.get("Events");
+		LuaValue callback = events.get("OnSessionChanged");
+		if( !callback.isnil() ) callback.invoke();
 	}
 
 	synchronized void cleanup()
