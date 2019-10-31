@@ -135,7 +135,9 @@ public class CS implements ClientManagerDelegate
 			{
 				try
 				{
-					String str = con.readLine(">>").trim();
+					String cs  = con.readLine(">>");
+					if( cs == null ) break;
+					String str = cs.trim();
 
 					if( str.equals("/stop") )
 					{
@@ -145,19 +147,26 @@ public class CS implements ClientManagerDelegate
 							Log.info("Cancelling: %s", timer.toString());
 							timer.cancel();
 						}
-
 						server.setStopAtShutdown(true);
 						server.stop();
 						break;
 					}
 					else if( str.length() > 0 )
 					{
-						(new LuaThread(str)).start();
+						try
+						{
+							(new LuaThread(str)).start();
+						}
+						catch(Exception e)
+						{
+							Log.error(e.getMessage());
+						}
 					}
 				}
 				catch(Exception e)
 				{
 					Log.error(e.getMessage());
+					break;
 				}
 			}
 		}

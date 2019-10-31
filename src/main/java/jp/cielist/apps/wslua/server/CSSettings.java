@@ -8,6 +8,7 @@
 package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
+import jp.cielist.apps.wslua.settings.Config;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -80,6 +81,23 @@ public class CSSettings
 		}
 		luaBootstrapFile = property.getProperty("lua.bootstrap", "");
 		luaPackagePath   = property.getProperty("lua.package.path" , "?.lua");
+
+		// LogLevel
+		Config.LOGLEVEL = 0;
+		String logLevel = property.getProperty("log.level","INFO");
+		for(String le : logLevel.trim().split("/[,]/"))
+		{
+			// INFO, NOTICE, WARNING, ERROR, FATAL, DEBUG, LUA
+			le = le.trim();
+			if     ( le.equalsIgnoreCase("INFO") )    Config.LOGLEVEL |= Log.LOGTYPE_INFO;
+			else if( le.equalsIgnoreCase("NOTICE") )  Config.LOGLEVEL |= Log.LOGTYPE_NOTICE;
+			else if( le.equalsIgnoreCase("WARNING") ) Config.LOGLEVEL |= Log.LOGTYPE_WARNING;
+			else if( le.equalsIgnoreCase("ERROR") )   Config.LOGLEVEL |= Log.LOGTYPE_ERROR;
+			else if( le.equalsIgnoreCase("FATAL") )   Config.LOGLEVEL |= Log.LOGTYPE_FATAL;
+			else if( le.equalsIgnoreCase("DEBUG") )   Config.LOGLEVEL |= Log.LOGTYPE_DEBUG;
+			else if( le.equalsIgnoreCase("LUA") )     Config.LOGLEVEL |= Log.LOGTYPE_LUA;
+			else if( le.equalsIgnoreCase("ALL") )     Config.LOGLEVEL |= Log.LOGTYPE_ALL;
+		}
 
 		description();
 	}

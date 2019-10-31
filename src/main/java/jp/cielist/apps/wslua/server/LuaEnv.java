@@ -56,6 +56,7 @@ public class LuaEnv implements ClientManagerDelegate
 		core = LuaValue.tableOf();
 		core.set("Versions", versions);
 		core.set("Events", events);
+		core.set("Request", LuaValue.tableOf());
 
 		core.set("Log",       (new LuaLog()).call());
 		core.set("Crypt",     (new LuaCrypt()).call());
@@ -90,9 +91,10 @@ public class LuaEnv implements ClientManagerDelegate
 		}
 		catch(Exception e)
 		{
+			Log.error(e.getMessage());
 			try
 			{
-				String p = ProtocolString.encode(new String[]{"SERVICE", "NG", "InternalServerError", e.getMessage()});
+				String p = "null";
 				if( session != null ) session.getRemote().sendString(p);
 				Log.sendLog(p);
 			}
@@ -100,15 +102,12 @@ public class LuaEnv implements ClientManagerDelegate
 			{
 				Log.debug("Fatal connection error, %s", ei.getMessage());
 			}
-			if( session != null ) session.close();
 		}
 	}
 
 	synchronized public void run(String luaFileName, LuaValue value) throws IOException
 	{
-		LuaTable proto = LuaValue.tableOf();
-		luaGlobals.set("in", value);
-
+		core.set("Request", value);
 		try
 		{
 			LuaValue chunk = luaGlobals.loadfile(CSConfig.settings.luaDir + luaFileName);
@@ -118,9 +117,17 @@ public class LuaEnv implements ClientManagerDelegate
 		}
 		catch(Exception e)
 		{
-			String p = ProtocolString.encode(new String[]{"SERVICE","NG","InternalServerError",luaFileName,e.getMessage()});
-			if( session != null ) session.getRemote().sendString(p);
-			Log.sendLog(p);
+			Log.error(e.getMessage());
+			try
+			{
+				String p = "null";
+				if( session != null ) session.getRemote().sendString(p);
+				Log.sendLog(p);
+			}
+			catch(IOException ei)
+			{
+				Log.debug("Fatal connection error, %s", ei.getMessage());
+			}
 		}
 		luaDB.cleanup();
 	}

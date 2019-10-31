@@ -24,7 +24,9 @@ public class Log
 	static public int LOGTYPE_DEBUG   = 0x00000020;
 	static public int LOGTYPE_LUA     = 0x10000000;
 
-	static public int LOGLEVEL_ALL = LOGTYPE_INFO | LOGTYPE_NOTICE | LOGTYPE_WARNING | LOGTYPE_ERROR | LOGTYPE_FATAL | LOGTYPE_DEBUG | LOGTYPE_LUA;
+	static public int LOGTYPE_ALL     =
+			LOGTYPE_INFO | LOGTYPE_NOTICE | LOGTYPE_WARNING |
+			LOGTYPE_ERROR | LOGTYPE_FATAL | LOGTYPE_DEBUG | LOGTYPE_LUA;
 
 	static public void write(int logType, String str)
 	{

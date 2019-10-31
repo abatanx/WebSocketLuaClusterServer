@@ -11,5 +11,5 @@ import jp.cielist.apps.wslua.common.Log;
 public class Config
 {
 	// 設定ファイル
-	final public static int LOGLEVEL = Log.LOGLEVEL_ALL;
+	public static int LOGLEVEL = Log.LOGTYPE_ALL;
 }

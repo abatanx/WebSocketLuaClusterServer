@@ -3,7 +3,6 @@ package jp.cielist.apps.wslua.lua;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.luaj.vm2.*;
 
-import java.io.IOException;
 import java.util.*;
 
 public class JSONValueToString
@@ -46,22 +45,21 @@ public class JSONValueToString
 			key = LuaValue.NIL;
 			while( true )
 			{
-				Varargs n = luaValue.inext(key);
-				if( (key = n.arg1()).isnil() ) break;
-				array.add(parse(n.arg(2)));
-			}
-
-			key = LuaValue.NIL;
-			while( true )
-			{
 				Varargs n = luaValue.next(key);
 				if( (key = n.arg1()).isnil() ) break;
-				hash.put(key.tojstring(), parse(n.arg(2)));
+				if( key.isint() )
+				{
+					array.add(parse(n.arg(2)));
+				}
+				else
+				{
+					hash.put(key.tojstring(), parse(n.arg(2)));
+				}
 			}
 
 			if( hash.size() == 0 )
 			{
-				return array;
+				return array.toArray(new Object[0]);
 			}
 			else if( array.size() == 0 )
 			{
