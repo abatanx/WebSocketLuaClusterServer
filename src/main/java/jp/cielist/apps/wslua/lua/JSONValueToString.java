@@ -32,10 +32,11 @@ public class JSONValueToString
 	private Object parse(LuaValue luaValue)
 	{
 		if(      luaValue.isnil()     ) return null;
-		else if( luaValue.isstring()  ) return luaValue.tojstring();
 		else if( luaValue.isboolean() ) return luaValue.toboolean();
 		else if( luaValue.isint()     ) return luaValue.toint();
 		else if( luaValue.islong()    ) return luaValue.tolong();
+		else if( luaValue.isnumber()  ) return luaValue.todouble();
+		else if( luaValue.isstring()  ) return luaValue.tojstring();
 		else if( luaValue.istable()   )
 		{
 			LuaValue key;
