@@ -10,10 +10,7 @@ package jp.cielist.apps.wslua.lua;
 import jp.cielist.apps.wslua.common.Log;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.lib.OneArgFunction;
-import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
-
-import java.io.IOException;
 
 public class LuaJSON extends ZeroArgFunction
 {
@@ -25,15 +22,15 @@ public class LuaJSON extends ZeroArgFunction
 	public LuaValue call()
 	{
 		LuaValue library = tableOf();
-		library.set("generate", new generate());
-		library.set("parse",    new parse());
+		library.set("stringify", new stringify());
+		library.set("parse", new parse());
 		return library;
 	}
 
 	/**
 	 * JSON.generate
 	 */
-	static class generate extends OneArgFunction
+	static class stringify extends OneArgFunction
 	{
 		public LuaValue call(LuaValue object)
 		{
