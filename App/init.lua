@@ -1,4 +1,4 @@
 --
 -- init.lua
 --
-ws = WebSocket.new()
+ws = Core.WebSocket.new()
