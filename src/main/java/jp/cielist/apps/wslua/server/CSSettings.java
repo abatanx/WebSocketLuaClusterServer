@@ -85,7 +85,7 @@ public class CSSettings
 		// LogLevel
 		Config.LOGLEVEL = 0;
 		String logLevel = property.getProperty("log.level","INFO");
-		for(String le : logLevel.trim().split("/[,]/"))
+		for(String le : logLevel.trim().split("[,]"))
 		{
 			// INFO, NOTICE, WARNING, ERROR, FATAL, DEBUG, LUA
 			le = le.trim();
