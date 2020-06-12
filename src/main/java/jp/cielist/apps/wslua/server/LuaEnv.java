@@ -8,7 +8,6 @@
 package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
-import jp.cielist.apps.wslua.common.ProtocolString;
 import jp.cielist.apps.wslua.lua.*;
 import org.eclipse.jetty.util.Jetty;
 import org.eclipse.jetty.websocket.api.Session;
@@ -62,7 +61,7 @@ public class LuaEnv implements ClientManagerDelegate
 		core.set("Crypt",     (new LuaCrypt()).call());
 		core.set("DB",        (luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call());
 		core.set("WebSocket", (new LuaWebSocket(session)).call());
-		core.set("Hub",       (new LuaHub(session)).call());
+		core.set("Hubs",      (new LuaHubs(session)).call());
 		core.set("Timer",     (new LuaTimer()).call());
 		core.set("JSON",      (new LuaJSON()).call());
 

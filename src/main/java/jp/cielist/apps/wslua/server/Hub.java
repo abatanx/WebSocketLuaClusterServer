@@ -8,15 +8,18 @@
 package jp.cielist.apps.wslua.server;
 
 import org.eclipse.jetty.websocket.api.Session;
+import org.luaj.vm2.LuaValue;
 import java.util.HashMap;
 
 public class Hub
 {
-	private HashMap<Session,Object> members;
+	private HashMap<Session,LuaValue> members;
+	private LuaEnvHub lua;
 
 	public Hub()
 	{
-		members = new HashMap<Session,Object>();
+		members = new HashMap<Session,LuaValue>();
+		lua = new LuaEnvHub(this);
 	}
 
 	public Object[] getSessions()
@@ -29,18 +32,28 @@ public class Hub
 		return members.containsKey(session);
 	}
 
-	public boolean join(Session session, Object object)
+	public boolean join(Session session, LuaValue object)
 	{
 		if( members.containsKey(session) ) return false;
+		lua.join(object);
 		members.put(session, object);
+		lua.joined(object);
 		return true;
 	}
 
 	public boolean leave(Session session)
 	{
 		if( !members.containsKey(session) ) return false;
+		LuaValue object = members.get(session);
+		lua.leave(object);
 		members.remove(session);
+		lua.left(object);
 		return true;
+	}
+
+	public void close()
+	{
+		lua.close();
 	}
 
 	public int count()

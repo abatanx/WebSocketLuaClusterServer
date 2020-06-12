@@ -19,78 +19,29 @@ import org.luaj.vm2.lib.ZeroArgFunction;
 public class LuaHub extends ZeroArgFunction
 {
 	private Session session;
+	private Hub hub;
 
-	public LuaHub(Session session)
+	public LuaHub(Session session, Hub hub)
 	{
-		Log.debug("Activating Hub module...");
+		Log.debug("Activating Hub module, Hub %d ...", CS.hubManager.getId(hub));
 		this.session = session;
+		this.hub = hub;
 	}
 
 	public LuaValue call()
 	{
 		LuaValue library = tableOf();
-		library.set("new", new _new(this.session));
-		library.set("hubs", new hubs(this.session));
+		library.set("id", new _instance_methods_._id(hub));
+		library.set("join", new _instance_methods_.join(hub, session));
+		library.set("leave", new _instance_methods_.leave(hub, session));
+		library.set("count", new _instance_methods_.count(hub));
+		library.set("members", new _instance_methods_.members(hub));
+		library.set("isMember", new _instance_methods_.isMember(hub, session));
 		return library;
-	}
-
-	static class _new extends OneArgFunction
-	{
-		private Session session;
-		private _new(Session session)
-		{
-			this.session = session;
-		}
-
-		public LuaValue call(LuaValue arg2)
-		{
-			int key = arg2.toint();
-			Hub hub = CS.hubManager.get(key);
-			if (hub == null)
-			{
-				hub = new Hub();
-				CS.hubManager.add(key, hub);
-			}
-			return _instance_methods_.init(hub, session);
-		}
-	}
-
-	static class hubs extends ZeroArgFunction
-	{
-		private Session session;
-		private hubs(Session session)
-		{
-			this.session = session;
-		}
-
-		public LuaValue call()
-		{
-			Hub[] hubs = CS.hubManager.hubs();
-			int i = 0;
-			LuaValue result = tableOf();
-			for( Hub hub : hubs )
-			{
-				result.set(i+1, _instance_methods_.init(hub, session));
-				i ++;
-			}
-			return result;
-		}
 	}
 
 	static class _instance_methods_
 	{
-		static LuaValue init(Hub hub, Session session)
-		{
-			LuaValue library = tableOf();
-			library.set("id", new _instance_methods_._id(hub));
-			library.set("join", new _instance_methods_.join(hub, session));
-			library.set("leave", new _instance_methods_.leave(hub, session));
-			library.set("count", new _instance_methods_.count(hub));
-			library.set("members", new _instance_methods_.members(hub));
-			library.set("isMember", new _instance_methods_.isMember(hub, session));
-			return library;
-		}
-
 		static class _id extends OneArgFunction
 		{
 			private Hub hub;
