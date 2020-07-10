@@ -29,7 +29,7 @@ public class LuaHubs extends ZeroArgFunction
 	{
 		LuaValue library = tableOf();
 		library.set("new", new _new(this.session));
-		library.set("hubs", new hubs(this.session));
+		library.set("all", new all(this.session));
 		return library;
 	}
 
@@ -49,15 +49,16 @@ public class LuaHubs extends ZeroArgFunction
 			{
 				hub = new Hub();
 				CS.hubManager.add(key, hub);
+				hub.initLuaEnvHub();
 			}
 			return (new LuaHub(session, hub)).call();
 		}
 	}
 
-	static class hubs extends ZeroArgFunction
+	static class all extends ZeroArgFunction
 	{
 		private Session session;
-		private hubs(Session session)
+		private all(Session session)
 		{
 			this.session = session;
 		}
