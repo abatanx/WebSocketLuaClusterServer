@@ -64,6 +64,7 @@ public class LuaEnv implements ClientManagerDelegate
 		core.set("Hubs",      (new LuaHubs(session)).call());
 		core.set("Timer",     (new LuaTimer()).call());
 		core.set("JSON",      (new LuaJSON()).call());
+		core.set("StringUtils", (new LuaStringUtils()).call());
 
 		luaGlobals.set("Core", core);
 

@@ -60,11 +60,11 @@ public class LuaEnvHub implements HubManagerDelegate
 		core.set("Log", (new LuaLog()).call());
 		core.set("Crypt", (new LuaCrypt()).call());
 		core.set("DB", (luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call());
-//		core.set("WebSocket", (new LuaWebSocket(session)).call());
-//		core.set("Hub",       (new LuaHub(session)).call());
 		core.set("Timer", (new LuaTimer()).call());
 		core.set("JSON", (new LuaJSON()).call());
+		core.set("StringUtils", (new LuaStringUtils()).call());
 		core.set("Hub", (new LuaHub(null,hub)).call());
+
 
 		luaGlobals.set("Core", core);
 
