@@ -10,11 +10,11 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.7.v20170914'
-    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.4.7.v20170914'
-    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.4.7.v20170914'
-    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.4.7.v20170914'
-    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-common', version: '9.4.7.v20170914'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.31.v20200723'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.4.31.v20200723'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.4.31.v20200723'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.4.31.v20200723'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-common', version: '9.4.31.v20200723'
     compile group: 'org.luaj', name: 'luaj-jse', version: '3.0.1'
     compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
     compile group: 'org.scala-lang', name: 'jline', version: '2.10.7'
