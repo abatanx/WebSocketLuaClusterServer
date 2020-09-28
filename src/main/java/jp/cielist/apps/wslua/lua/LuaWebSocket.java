@@ -62,6 +62,7 @@ public class LuaWebSocket extends ZeroArgFunction
 				}
 				catch(IOException e)
 				{
+					session.close();
 					return LuaValue.valueOf(false);
 				}
 				return LuaValue.valueOf(true);
