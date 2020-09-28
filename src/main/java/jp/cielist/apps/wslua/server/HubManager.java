@@ -10,7 +10,9 @@ package jp.cielist.apps.wslua.server;
 import jp.cielist.apps.wslua.common.Log;
 import org.eclipse.jetty.websocket.api.Session;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HubManager
@@ -71,6 +73,9 @@ public class HubManager
 	public void leaveFromAllHubs(Session session)
 	{
 		Log.debug("HubManager: Checking all hubs at leave session.");
+
+		List<Integer> removeIds = new ArrayList<Integer>();
+
 		for (Map.Entry<Integer, Hub> entry : hubs.entrySet())
 		{
 			if( entry.getValue().isMember(session) )
@@ -85,10 +90,12 @@ public class HubManager
 					Log.debug("HubManager: Hub %d is empty, auto closed.",
 						entry.getKey().intValue());
 					entry.getValue().close();
-					hubs.remove(entry.getKey());
+					removeIds.add(entry.getKey());
 				}
 			}
 		}
+
+		for(Integer removeId : removeIds) hubs.remove(removeId);
 	}
 
 	/**
