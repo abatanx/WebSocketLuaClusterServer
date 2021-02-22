@@ -28,7 +28,7 @@ public class Log
 			LOGTYPE_INFO | LOGTYPE_NOTICE | LOGTYPE_WARNING |
 			LOGTYPE_ERROR | LOGTYPE_FATAL | LOGTYPE_DEBUG | LOGTYPE_LUA;
 
-	static public void write(int logType, String str)
+	static synchronized public void write(int logType, String str)
 	{
 		if ((Config.LOGLEVEL & logType) != 0)
 		{

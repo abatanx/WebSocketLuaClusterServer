@@ -84,14 +84,14 @@ public class HubManager
 					session.getRemoteAddress().toString(),
 						entry.getKey().intValue());
 				entry.getValue().leave(session);
+			}
 
-				if( entry.getValue().count() == 0 )
-				{
-					Log.debug("HubManager: Hub %d is empty, auto closed.",
+			if( entry.getValue().count() == 0 )
+			{
+				Log.debug("HubManager: Hub %d is empty, auto closed.",
 						entry.getKey().intValue());
-					entry.getValue().close();
-					removeIds.add(entry.getKey());
-				}
+				entry.getValue().close();
+				removeIds.add(entry.getKey());
 			}
 		}
 
@@ -110,6 +110,7 @@ public class HubManager
 			{
 				Log.debug("HubManager: Hub %d auto removed",
 					entry.getKey().intValue());
+				entry.getValue().close();
 				hubs.remove(entry.getKey());
 			}
 		}

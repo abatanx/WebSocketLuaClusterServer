@@ -57,8 +57,15 @@ public class LuaLog extends ZeroArgFunction
 			this.logDumpType = logDumpType;
 		}
 
-		private void extract(LuaValue luaValue, ArrayList<String> logLines, String prefixSpace, String prefix, String suffix)
+		private void extract(LuaValue luaValue, ArrayList<String> logLines, String prefixSpace, String prefix, String suffix, int depth)
 		{
+			depth ++;
+			if( depth > 10 )
+			{
+				logLines.add(prefixSpace + "-- Overflow depth");
+				return;
+			}
+
 			if(      luaValue.isnil()     ) logLines.add(prefixSpace + prefix + "nil" + suffix);
 			else if( luaValue.isboolean() ) logLines.add(prefixSpace + prefix + (luaValue.toboolean() ? "true" : "false") + suffix + "\t-- (boolean)");
 			else if( luaValue.isint()     ) logLines.add(prefixSpace + prefix + String.valueOf(luaValue.toint()) + suffix + "\t-- (int)");
@@ -85,11 +92,11 @@ public class LuaLog extends ZeroArgFunction
 
 					if( n.arg1().isint() )
 					{
-						extract(n.arg(2), logLines, prefixSpace + "\t","", comma);
+						extract(n.arg(2), logLines, prefixSpace + "\t","", comma, depth);
 					}
 					else
 					{
-						extract(n.arg(2), logLines, prefixSpace + "\t", String.format("%s\t=\t", n.arg1().tojstring()), comma);
+						extract(n.arg(2), logLines, prefixSpace + "\t", String.format("%s\t=\t", n.arg1().tojstring()), comma, depth);
 					}
 				}
 
@@ -107,7 +114,7 @@ public class LuaLog extends ZeroArgFunction
 
 				case 1:
 					ArrayList<String> logLines = new ArrayList<>();
-					extract(luaValue, logLines, "", "","");
+					extract(luaValue, logLines, "", "","", 0);
 					Log.write(logType, "\n" + String.join("\n", logLines.toArray(new String[0])));
 					logLines.clear();
 					break;
