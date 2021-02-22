@@ -21,9 +21,14 @@ public class Hub
 		members = new HashMap<Session,LuaValue>();
 	}
 
-	public void initLuaEnvHub()
+	public void initLuaEnv()
 	{
 		lua = new LuaEnvHub(this);
+	}
+
+	public LuaEnvHub getLuaEnv()
+	{
+		return lua;
 	}
 
 	public Object[] getSessions()

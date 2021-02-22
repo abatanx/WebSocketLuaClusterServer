@@ -49,9 +49,9 @@ public class LuaHubs extends ZeroArgFunction
 			{
 				hub = new Hub();
 				CS.hubManager.add(key, hub);
-				hub.initLuaEnvHub();
+				hub.initLuaEnv();
 			}
-			return (new LuaHub(session, hub)).call();
+			return hub.getLuaEnv().getLua();
 		}
 	}
 
@@ -70,7 +70,7 @@ public class LuaHubs extends ZeroArgFunction
 			LuaValue result = tableOf();
 			for( Hub hub : hubs )
 			{
-				result.set(i+1, (new LuaHub(session, hub)).call());
+				result.set(i+1, hub.getLuaEnv().getLua());
 				i ++;
 			}
 			return result;
