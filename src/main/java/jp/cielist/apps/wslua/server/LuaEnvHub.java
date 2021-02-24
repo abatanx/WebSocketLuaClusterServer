@@ -48,12 +48,8 @@ public class LuaEnvHub implements HubManagerDelegate
 		versions.set("jre", LuaValue.valueOf(System.getProperty("java.version")));
 		versions.set("jvm", LuaValue.valueOf(System.getProperty("java.vm.version")));
 
-		LuaValue events = LuaValue.tableOf();
-
 		core = LuaValue.tableOf();
 		core.set("Versions", versions);
-		core.set("Events", events);
-		core.set("Request", LuaValue.tableOf());
 
 		core.set("Log", (new LuaLog()).call());
 		core.set("Crypt", (new LuaCrypt()).call());
