@@ -17,30 +17,21 @@ import org.luaj.vm2.lib.ZeroArgFunction;
 
 public class LuaHubs extends ZeroArgFunction
 {
-	private Session session;
-
-	public LuaHubs(Session session)
+	public LuaHubs()
 	{
 		Log.debug("Activating Hubs module...");
-		this.session = session;
 	}
 
 	public LuaValue call()
 	{
 		LuaValue library = tableOf();
-		library.set("new", new _new(this.session));
-		library.set("all", new all(this.session));
+		library.set("new", new _new());
+		library.set("all", new all());
 		return library;
 	}
 
 	static class _new extends OneArgFunction
 	{
-		private Session session;
-		private _new(Session session)
-		{
-			this.session = session;
-		}
-
 		public LuaValue call(LuaValue arg2)
 		{
 			int key = arg2.toint();
@@ -57,12 +48,6 @@ public class LuaHubs extends ZeroArgFunction
 
 	static class all extends ZeroArgFunction
 	{
-		private Session session;
-		private all(Session session)
-		{
-			this.session = session;
-		}
-
 		public LuaValue call()
 		{
 			Hub[] hubs = CS.hubManager.hubs();

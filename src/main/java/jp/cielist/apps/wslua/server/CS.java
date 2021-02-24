@@ -9,11 +9,13 @@ package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
 
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.client.io.WebSocketClientConnection;
+import org.eclipse.jetty.websocket.server.WebSocketServerConnection;
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.luaj.vm2.Lua;
 import scala.tools.jline.console.ConsoleReader;
 
@@ -39,7 +41,7 @@ public class CS implements ClientManagerDelegate
 		String propFile = "server.properties";
 
 		Log.info("%s %s", CSConfig.AppName, CSConfig.AppVersion);
-		Log.info("Copyright 2013, 2017-2019 (C) CIEL, K.K. All rights reserved.");
+		Log.info("Copyright 2013, 2017-2021 (C) CIEL, K.K. All rights reserved.");
 
 		clientManager = new ClientManager(this);
 		hubManager = new HubManager();

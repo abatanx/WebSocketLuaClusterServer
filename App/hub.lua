@@ -1,22 +1,22 @@
 --
 -- hub.lua
 --
-Core.Events.onJoin = function(ws)
+onJoin = function(ws)
     print("--> Join")
 end
 
-Core.Events.onJoined = function(ws)
+onJoined = function(ws)
     print("--> Joined")
 end
 
-Core.Events.onLeave = function(ws)
+onLeave = function(ws)
     print("--> Leave")
 end
 
-Core.Events.onLeft = function(ws)
+onLeft = function(ws)
     print("--> Left")
 end
 
-Core.Events.onClose = function()
+onClose = function()
     print("--> Close")
 end

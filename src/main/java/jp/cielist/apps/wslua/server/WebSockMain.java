@@ -14,6 +14,8 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @WebSocket
 public class WebSockMain
@@ -32,7 +34,17 @@ public class WebSockMain
 	@OnWebSocketConnect
 	synchronized public void onConnect(Session session)
 	{
-		Log.debug("Connected from %s", session.getRemoteAddress().toString());
+		Log.debug("Connected from %s", CSSessionSupport.getRemoteAddress(session));
+
+//		session.getUpgradeRequest().getHeaders().forEach((k,v) ->
+//		{
+//			Log.debug("UpgradeRequest: %s %s", k, v);
+//		});
+
+//		session.getUpgradeResponse().getHeaders().forEach((k,v) ->
+//		{
+//			Log.debug("UpgradeResponse: %s %s", k, v);
+//		});
 
 		this.session = session;
 
@@ -73,6 +85,6 @@ public class WebSockMain
 		CS.clientManager.remove(this);
 		getLua().cleanup();
 
-		Log.debug("Disconnected from %s, %s", session.getRemoteAddress().toString(), reason);
+		Log.debug("Disconnected from %s, %s", CSSessionSupport.getRemoteAddress(session), reason);
 	}
 }

@@ -9,15 +9,24 @@ package jp.cielist.apps.wslua.lua;
 
 import jp.cielist.apps.wslua.common.Log;
 import jp.cielist.apps.wslua.common.ProtocolString;
+import jp.cielist.apps.wslua.server.CSConfig;
+import jp.cielist.apps.wslua.server.CSSessionSupport;
+import jp.cielist.apps.wslua.server.DB;
 import org.eclipse.jetty.websocket.api.Session;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.*;
+import org.luaj.vm2.lib.jse.CoerceJavaToLua;
+import org.luaj.vm2.lib.jse.CoerceLuaToJava;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 
 public class LuaWebSocket extends ZeroArgFunction
 {
+	static public String INTERNAL_VARIABLES = "__VARS__";
+
 	private Session session;
 	public LuaWebSocket(Session session)
 	{
@@ -30,6 +39,15 @@ public class LuaWebSocket extends ZeroArgFunction
 		LuaValue library = tableOf();
 		library.set("new", new _new());
 		return library;
+	}
+
+	public class InternalVariables
+	{
+		public Session session;
+		InternalVariables(Session session)
+		{
+			this.session = session;
+		}
 	}
 
 	class _new extends ZeroArgFunction
@@ -47,6 +65,7 @@ public class LuaWebSocket extends ZeroArgFunction
 			library.set("getProtocolVersion", new getProtocolVersion());
 			library.set("isOpen", new isOpen());
 			library.set("isSecure", new isSecure());
+			library.set(INTERNAL_VARIABLES, CoerceJavaToLua.coerce(new InternalVariables(session)));
 			return library;
 		}
 
@@ -115,7 +134,7 @@ public class LuaWebSocket extends ZeroArgFunction
 		{
 			public LuaValue call(LuaValue self)
 			{
-				return LuaValue.valueOf(session.getLocalAddress().toString());
+				return LuaValue.valueOf(session.getLocalAddress().getAddress().getHostAddress());
 			}
 		}
 
@@ -123,7 +142,7 @@ public class LuaWebSocket extends ZeroArgFunction
 		{
 			public LuaValue call(LuaValue self)
 			{
-				return LuaValue.valueOf(session.getRemoteAddress().toString());
+				return LuaValue.valueOf(CSSessionSupport.getRemoteAddress(session));
 			}
 		}
 
@@ -148,6 +167,14 @@ public class LuaWebSocket extends ZeroArgFunction
 			public LuaValue call(LuaValue self)
 			{
 				return LuaValue.valueOf(session.isSecure());
+			}
+		}
+
+		class getSession extends OneArgFunction
+		{
+			public LuaValue call(LuaValue self)
+			{
+				return CoerceJavaToLua.coerce(session);
 			}
 		}
 	}

@@ -21,6 +21,7 @@ import java.util.Properties;
 public class CSSettings
 {
 	public int port;
+	public boolean viaProxy;
 	public String appName, appVersion;
 	public String jdbcDriver, dbDsn, dbUser, dbPassword;
 	public String hashKey, passwordHashKey;
@@ -38,6 +39,7 @@ public class CSSettings
 		appName = "";
 		appVersion = "";
 		port = 9988;
+		viaProxy = false;
 		jdbcDriver = "";
 		dbDsn = "";
 		dbUser = "";
@@ -63,6 +65,7 @@ public class CSSettings
 
 		// WS待ち受けポート番号
 		port = Integer.parseInt(property.getProperty("server.port","9988"));
+		viaProxy = Boolean.parseBoolean(property.getProperty("server.via_proxy","false"));
 
 		// DB接続
 		jdbcDriver = property.getProperty("jdbc.driver", "");
@@ -115,6 +118,7 @@ public class CSSettings
 		Log.info("\tapp.name         : %s", appName);
 		Log.info("\tapp.version      : %s", appVersion);
 		Log.info("\tserver.port      : %d", port);
+		Log.info("\tserver.via_proxy : %s", viaProxy ? "true (Support to X-Forwarded-For)" : "false" );
 		Log.info("\t-------- LuaDB");
 		Log.info("\tjdbc.driver      : %s", jdbcDriver);
 		Log.info("\tdb.dsn           : %s", dbDsn);

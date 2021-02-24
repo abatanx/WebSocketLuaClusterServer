@@ -10,7 +10,7 @@ package jp.cielist.apps.wslua.server;
 public class CSConfig
 {
 	final static public String AppName = "WebSocket-Lua-ClusterServer";
-	final static public String AppVersion = "1.00";
+	final static public String AppVersion = "1.10";
 
 	final static public CSSettings settings = new CSSettings();
 }
