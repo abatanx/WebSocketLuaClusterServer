@@ -20,7 +20,7 @@ public class LuaThread extends Thread
 	public LuaThread(String luaFilename)
 	{
 		this.luaFilename = luaFilename;
-		luaEnv = new LuaEnv(null, true);
+		luaEnv = new LuaEnv(null, true, false);
 	}
 
 	public void cleanup()
@@ -34,11 +34,19 @@ public class LuaThread extends Thread
 		super.run();
 		try
 		{
-			luaEnv.run(luaFilename, LuaValue.NIL);
+			synchronized (CS.mutex.luaLock)
+			{
+				luaEnv.run(luaFilename, LuaValue.NIL);
+			}
 		}
 		catch (IOException e)
 		{
-			Log.debug("LuaThread exception: %s", e.getMessage());
+			Log.error("LuaThread exception: %s", e.getMessage());
 		}
+	}
+
+	public LuaEnv getLuaEnv()
+	{
+		return luaEnv;
 	}
 }

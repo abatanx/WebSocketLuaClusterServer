@@ -1,0 +1,26 @@
+{
+    "name": "WebSocketLuaClusterServer admin visualize library",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "build": "webpack --mode=development --watch",
+        "release": "webpack --mode=production"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@types/jquery": "^3.5.1"
+    },
+    "devDependencies": {
+        "@babel/core": "7.11.6",
+        "@babel/preset-env": "7.11.5",
+        "babel-loader": "8.1.0",
+        "clean-webpack-plugin": "1.0.1",
+        "core-js": "3.6.5",
+        "ts-loader": "8.0.3",
+        "typescript": "4.0.2",
+        "webpack": "4.44.1",
+        "webpack-cli": "3.3.12",
+        "whatwg-fetch": "3.4.1"
+    }
+}

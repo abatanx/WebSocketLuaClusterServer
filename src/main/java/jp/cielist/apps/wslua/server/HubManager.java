@@ -18,9 +18,16 @@ import java.util.Map;
 public class HubManager
 {
 	private HashMap<Integer,Hub> hubs = new HashMap<Integer, Hub>();
+	private ClientManagerDelegate delegate;
 
-	public HubManager()
+	public HubManager(ClientManagerDelegate delegate)
 	{
+		this.delegate = delegate;
+	}
+
+	public ClientManagerDelegate getDelegate()
+	{
+		return delegate;
 	}
 
 	/**
@@ -28,7 +35,11 @@ public class HubManager
 	 * */
 	public void add(Integer key, Hub hub)
 	{
-		hubs.put(key,hub);
+		if( hubs.get(key) == null )
+		{
+			hubs.put(key,hub);
+			delegate.onHubStart(hub);
+		}
 	}
 
 	/**
@@ -36,7 +47,12 @@ public class HubManager
 	 * */
 	public void remove(Integer key)
 	{
-		hubs.remove(key);
+		Hub removingHub;
+		if( (removingHub = hubs.get(key)) != null )
+		{
+			hubs.remove(key);
+			delegate.onHubEnd(removingHub);
+		}
 	}
 
 	/**
@@ -95,7 +111,7 @@ public class HubManager
 			}
 		}
 
-		for(Integer removeId : removeIds) hubs.remove(removeId);
+		for(Integer removeId : removeIds) remove(removeId);
 	}
 
 	/**
@@ -111,7 +127,7 @@ public class HubManager
 				Log.debug("HubManager: Hub %d auto removed",
 					entry.getKey().intValue());
 				entry.getValue().close();
-				hubs.remove(entry.getKey());
+				remove(entry.getKey());
 			}
 		}
 	}

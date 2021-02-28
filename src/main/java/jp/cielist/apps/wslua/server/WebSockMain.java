@@ -9,13 +9,10 @@ package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
 import jp.cielist.apps.wslua.lua.JSONStringToProtocol;
-import jp.cielist.apps.wslua.lua.JSONStringToValue;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 @WebSocket
 public class WebSockMain
@@ -26,65 +23,79 @@ public class WebSockMain
 	// Lua
 	private LuaEnv lua;
 
-	public LuaEnv getLua()
+	public LuaEnv getLuaEnv()
 	{
 		return lua;
 	}
 
-	@OnWebSocketConnect
-	synchronized public void onConnect(Session session)
+	public Session getSession()
 	{
-		Log.debug("Connected from %s", CSSessionSupport.getRemoteAddress(session));
+		return session;
+	}
 
-//		session.getUpgradeRequest().getHeaders().forEach((k,v) ->
-//		{
-//			Log.debug("UpgradeRequest: %s %s", k, v);
-//		});
+	@OnWebSocketConnect
+	public void onConnect(Session session)
+	{
+		synchronized (CS.mutex.luaLock)
+		{
+			Log.notice("Connected from %s", CSSessionSupport.getRemoteAddress(session));
 
-//		session.getUpgradeResponse().getHeaders().forEach((k,v) ->
-//		{
-//			Log.debug("UpgradeResponse: %s %s", k, v);
-//		});
+			this.session = session;
 
-		this.session = session;
+			lua = new LuaEnv(session, false, false);
 
-		lua = new LuaEnv(session, false);
-
-		CS.clientManager.add(this);
+			CS.clientManager.add(this);
+		}
 	}
 
 	@OnWebSocketMessage
-	synchronized public void onText(String message) {
-		//Log.debug("Received from %s", session.getRemoteAddress().toString());
-		Log.receiveLog(message);
-		try
+	public void onText(String message) {
+		synchronized (CS.mutex.luaLock)
 		{
-			JSONStringToProtocol jsonLua = new JSONStringToProtocol(message);
-
-			String rootKey = jsonLua.getRootKey();
-			if( rootKey != null )
+			Log.receiveLog(message);
+			try
 			{
-				if( rootKey.matches("^[_0-9A-Za-z]+$") )
+				JSONStringToProtocol jsonLua = new JSONStringToProtocol(message);
+
+				String rootKey = jsonLua.getRootKey();
+				if (rootKey != null)
 				{
-					String fileName = "_" + rootKey.toLowerCase() + ".lua";
-					lua.run(fileName, jsonLua.getRootValue() );
+					if (rootKey.matches("^[_0-9A-Za-z]+$"))
+					{
+						String fileName = "_" + rootKey.toLowerCase() + ".lua";
+						lua.run(fileName, jsonLua.getRootValue());
+					}
 				}
 			}
-		}
-		catch (IOException e)
-		{
-			Log.debug(e.getMessage());
-			this.session.close();
+			catch (IOException e)
+			{
+				Log.error("Receiving error %s, %s", CSSessionSupport.getRemoteAddress(session), e.getMessage());
+				this.session.close();
+			}
 		}
 	}
 
 	@OnWebSocketClose
-	synchronized public void onClose(int statusCode, String reason)
+	public void onClose(int statusCode, String reason)
 	{
-		CS.hubManager.leaveFromAllHubs(session);
-		CS.clientManager.remove(this);
-		getLua().cleanup();
+		synchronized (CS.mutex.luaLock)
+		{
+			CS.hubManager.leaveFromAllHubs(session);
+			CS.clientManager.remove(this);
+			getLuaEnv().cleanup();
 
-		Log.debug("Disconnected from %s, %s", CSSessionSupport.getRemoteAddress(session), reason);
+			Log.notice("Disconnected from %s, %s", CSSessionSupport.getRemoteAddress(session), reason);
+		}
 	}
+
+	@OnWebSocketError
+	public void onError(Throwable cause)
+	{
+		if (this.session != null) {
+			Log.notice("WebSocket error %s, %s", CSSessionSupport.getRemoteAddress(session), cause.getMessage());
+		}
+	}
+
+
+
 }

@@ -38,9 +38,9 @@ public class LuaHubs extends ZeroArgFunction
 			Hub hub = CS.hubManager.get(key);
 			if (hub == null)
 			{
-				hub = new Hub();
-				CS.hubManager.add(key, hub);
+				hub = new Hub(CS.hubManager.getDelegate());
 				hub.initLuaEnv();
+				CS.hubManager.add(key, hub);
 			}
 			return hub.getLuaEnv().getLua();
 		}

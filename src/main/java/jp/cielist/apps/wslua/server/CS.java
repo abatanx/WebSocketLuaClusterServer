@@ -13,10 +13,9 @@ import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.client.io.WebSocketClientConnection;
-import org.eclipse.jetty.websocket.server.WebSocketServerConnection;
-import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import org.luaj.vm2.Lua;
+import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import scala.tools.jline.console.ConsoleReader;
 
 import java.io.IOException;
@@ -26,14 +25,75 @@ import java.util.Timer;
 
 public class CS implements ClientManagerDelegate
 {
+	public static LuaEnv sharedLuaEnv;
 	public static ClientManager clientManager;
 	public static HubManager hubManager;
 	public static HashSet<Timer> timerManager;
+	public static Mutex mutex;
+
+	private void invokeEvent(String eventName, Varargs v)
+	{
+		LuaValue system   = sharedLuaEnv.getLua().get("Core");
+		LuaValue events   = system.get("Events");
+		LuaValue callback = events.get(eventName);
+		synchronized (mutex.luaLock)
+		{
+			if( !callback.isnil() ) callback.invoke(v);
+		}
+	}
 
 	@Override
 	public void onSessionChanged()
 	{
-		for (WebSockMain ws : clientManager.getClients() ) ws.getLua().onSessionChanged();
+		invokeEvent("OnSessionChanged", LuaValue.varargsOf(new LuaValue[0]));
+	}
+
+	@Override
+	public void onSessionJoin(WebSockMain ws)
+	{
+		invokeEvent("OnSessionJoin", LuaValue.varargsOf(new LuaValue[]{ws.getLuaEnv().getLua()}));
+	}
+
+	@Override
+	public void onSessionLeave(WebSockMain ws)
+	{
+		invokeEvent("OnSessionLeave", LuaValue.varargsOf(new LuaValue[]{ws.getLuaEnv().getLua()}));
+	}
+
+	@Override
+	public void onHubStart(Hub hub)
+	{
+		invokeEvent("OnHubStart", LuaValue.varargsOf(new LuaValue[]{hub.getLuaEnv().getLua()}));
+	}
+
+	@Override
+	public void onHubEnd(Hub hub)
+	{
+		invokeEvent("OnHubEnd", LuaValue.varargsOf(new LuaValue[]{hub.getLuaEnv().getLua()}));
+	}
+
+	@Override
+	public void onHubSessionJoin(Hub hub, WebSockMain ws)
+	{
+		invokeEvent("OnHubSessionJoin",
+			LuaValue.varargsOf(new LuaValue[]
+			{
+				hub.getLuaEnv().getLua(),
+				ws.getLuaEnv().getLua()
+			})
+		);
+	}
+
+	@Override
+	public void onHubSessionLeave(Hub hub, WebSockMain ws)
+	{
+		invokeEvent("OnHubSessionLeave",
+			LuaValue.varargsOf(new LuaValue[]
+			{
+				hub.getLuaEnv().getLua(),
+				ws.getLuaEnv().getLua()
+			})
+		);
 	}
 
 	public void server(String[] args)
@@ -43,8 +103,9 @@ public class CS implements ClientManagerDelegate
 		Log.info("%s %s", CSConfig.AppName, CSConfig.AppVersion);
 		Log.info("Copyright 2013, 2017-2021 (C) CIEL, K.K. All rights reserved.");
 
+		mutex = new Mutex();
 		clientManager = new ClientManager(this);
-		hubManager = new HubManager();
+		hubManager = new HubManager(this);
 		timerManager = new HashSet<>();
 
 		for(int i=0; i<args.length; i++)
@@ -102,10 +163,18 @@ public class CS implements ClientManagerDelegate
 		}
 
 		// bootstrap
+		sharedLuaEnv = new LuaEnv(null, true, true);
 		if( !CSConfig.settings.luaBootstrapFile.equals("") )
 		{
 			Log.info("++ Starting bootstrap...");
-			(new LuaThread(CSConfig.settings.luaBootstrapFile)).start();
+			try
+			{
+				sharedLuaEnv.run(CSConfig.settings.luaBootstrapFile, LuaValue.NIL);
+			}
+			catch (IOException e)
+			{
+				Log.error("coreLuaEnv exception: %s", e.getMessage());
+			}
 		}
 
 		// websocket handler
@@ -143,10 +212,10 @@ public class CS implements ClientManagerDelegate
 
 					if( str.equals("/stop") )
 					{
-						Log.info("Timer manager has %d timer instance(s).", timerManager.size());
+						Log.notice("Timer manager has %d timer instance(s).", timerManager.size());
 						for(Timer timer : timerManager)
 						{
-							Log.info("Cancelling: %s", timer.toString());
+							Log.notice("Cancelling: %s", timer.toString());
 							timer.cancel();
 						}
 						server.setStopAtShutdown(true);
@@ -157,7 +226,10 @@ public class CS implements ClientManagerDelegate
 					{
 						try
 						{
-							(new LuaThread(str)).start();
+							synchronized (CS.mutex.luaLock)
+							{
+								(new LuaThread(str)).start();
+							}
 						}
 						catch(Exception e)
 						{
@@ -174,7 +246,7 @@ public class CS implements ClientManagerDelegate
 		}
 		catch (IOException e)
 		{
-			Log.fatal("Can't use readline.");
+			Log.error("Can't use readline.");
 		}
 	}
 

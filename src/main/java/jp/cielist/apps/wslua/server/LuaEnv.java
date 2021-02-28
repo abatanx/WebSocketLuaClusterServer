@@ -18,7 +18,7 @@ import org.luaj.vm2.*;
 import org.luaj.vm2.lib.jse.*;
 
 
-public class LuaEnv implements ClientManagerDelegate
+public class LuaEnv
 {
 	// Session
 	private Session session;
@@ -32,7 +32,7 @@ public class LuaEnv implements ClientManagerDelegate
 
 	public Globals getLua() { return luaGlobals; }
 
-	public LuaEnv(Session session, boolean isCleanEnv)
+	public LuaEnv(Session session, boolean isCleanEnv, boolean hasEvent)
 	{
 		//
 		this.session = session;
@@ -49,13 +49,24 @@ public class LuaEnv implements ClientManagerDelegate
 		versions.set("jre", LuaValue.valueOf(System.getProperty("java.version")));
 		versions.set("jvm", LuaValue.valueOf(System.getProperty("java.vm.version")));
 
-		LuaValue events = LuaValue.tableOf();
-		events.set("OnSessionChanged", LuaValue.NIL);
 
 		core = LuaValue.tableOf();
 		core.set("Versions", versions);
-		core.set("Events", events);
 		core.set("Request", LuaValue.tableOf());
+
+		if( hasEvent )
+		{
+			// Callback to sharedLuaEnv only.
+			LuaValue events = LuaValue.tableOf();
+			events.set("OnSessionChanged", LuaValue.NIL );
+			events.set("OnSessionJoin", LuaValue.NIL );
+			events.set("OnSessionLeave", LuaValue.NIL );
+			events.set("OnHubStart", LuaValue.NIL );
+			events.set("OnHubEnd", LuaValue.NIL );
+			events.set("OnHubSessionJoin", LuaValue.NIL );
+			events.set("OnHubSessionLeave", LuaValue.NIL );
+			core.set("Events", events);
+		}
 
 		core.set("Log",       (new LuaLog()).call());
 		core.set("Crypt",     (new LuaCrypt()).call());
@@ -126,19 +137,10 @@ public class LuaEnv implements ClientManagerDelegate
 			}
 			catch(IOException ei)
 			{
-				Log.debug("Fatal connection error, %s", ei.getMessage());
+				Log.error("Fatal connection error, %s", ei.getMessage());
 			}
 		}
 		luaDB.cleanup();
-	}
-
-	@Override
-	public void onSessionChanged()
-	{
-		LuaValue system   = luaGlobals.get("Core");
-		LuaValue events   = system.get("Events");
-		LuaValue callback = events.get("OnSessionChanged");
-		if( !callback.isnil() ) callback.invoke();
 	}
 
 	synchronized void cleanup()

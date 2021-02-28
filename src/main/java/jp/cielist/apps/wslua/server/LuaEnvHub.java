@@ -15,6 +15,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.luaj.vm2.Globals;
 import org.luaj.vm2.Lua;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
 import org.luaj.vm2.lib.OneArgFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 import org.luaj.vm2.lib.jse.CoerceLuaToJava;
@@ -67,11 +68,14 @@ public class LuaEnvHub implements HubManagerDelegate
 		luaGlobals.set("members", new _instance_methods_.members(hub));
 		luaGlobals.set("isMember", new _instance_methods_.isMember(hub));
 
-		luaGlobals.set("OnClose", LuaValue.NIL);
-		luaGlobals.set("OnJoin", LuaValue.NIL);
-		luaGlobals.set("OnJoined", LuaValue.NIL);
-		luaGlobals.set("OnLeave", LuaValue.NIL);
-		luaGlobals.set("OnLeft", LuaValue.NIL);
+		// Callback to sharedLuaEnv only.
+		LuaValue events = LuaValue.tableOf();
+		events.set("OnClose", LuaValue.NIL );
+		events.set("OnJoin", LuaValue.NIL );
+		events.set("OnJoined", LuaValue.NIL );
+		events.set("OnLeave", LuaValue.NIL );
+		events.set("OnLeft", LuaValue.NIL );
+		core.set("Events", events);
 
 		// Stating hub.lua
 		String hubLuaFilename = CSConfig.settings.luaDir + "hub.lua";
@@ -86,40 +90,42 @@ public class LuaEnvHub implements HubManagerDelegate
 		}
 	}
 
-	private void invokeEvent(String callbackFunction, LuaValue object)
+	private void invokeEvent(String eventName, Varargs v)
 	{
-		LuaValue callback = luaGlobals.get(callbackFunction);
-		if (!callback.isnil()) callback.invoke(object);
+		LuaValue system   = getLua().get("Core");
+		LuaValue events   = system.get("Events");
+		LuaValue callback = events.get(eventName);
+		if( !callback.isnil() ) callback.invoke(v);
 	}
 
 	@Override
 	public void join(LuaValue object)
 	{
-		invokeEvent("onJoin", object);
+		invokeEvent("OnJoin", LuaValue.varargsOf(new LuaValue[]{object}));
 	}
 
 	@Override
 	public void joined(LuaValue object)
 	{
-		invokeEvent("onJoined", object);
+		invokeEvent("OnJoined", LuaValue.varargsOf(new LuaValue[]{object}));
 	}
 
 	@Override
 	public void leave(LuaValue object)
 	{
-		invokeEvent("onLeave", object);
+		invokeEvent("OnLeave", LuaValue.varargsOf(new LuaValue[]{object}));
 	}
 
 	@Override
 	public void left(LuaValue object)
 	{
-		invokeEvent("onLeft", object);
+		invokeEvent("OnLeft", LuaValue.varargsOf(new LuaValue[]{object}));
 	}
 
 	@Override
 	public void close()
 	{
-		invokeEvent("onClose", LuaValue.NIL);
+		invokeEvent("OnClose", LuaValue.varargsOf(new LuaValue[]{}));
 		cleanup();
 	}
 
