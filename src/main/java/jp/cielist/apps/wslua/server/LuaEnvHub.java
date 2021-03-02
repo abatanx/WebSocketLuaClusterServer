@@ -37,6 +37,8 @@ public class LuaEnvHub implements HubManagerDelegate
 
 	public LuaEnvHub(Hub hub)
 	{
+		int ID = CS.mutex.getMutexID();
+
 		// Initialize the LuaGlobals
 		luaGlobals = JsePlatform.standardGlobals();
 		luaGlobals.package_.setLuaPath(CSConfig.settings.luaPackagePath);
@@ -58,6 +60,8 @@ public class LuaEnvHub implements HubManagerDelegate
 		core.set("Timer", (new LuaTimer()).call());
 		core.set("JSON", (new LuaJSON()).call());
 		core.set("StringUtils", (new LuaStringUtils()).call());
+		core.set("Server", (new LuaServer()).call());
+		core.set("ID", LuaValue.valueOf(ID));
 
 		luaGlobals.set("Core", core);
 

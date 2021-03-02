@@ -82,7 +82,10 @@ public class LuaTimer extends ZeroArgFunction
 			{
 				try
 				{
-					callbackFunc.invoke(self);
+					synchronized (CS.mutex.luaLock)
+					{
+						callbackFunc.invoke(self);
+					}
 				}
 				catch(Exception e)
 				{

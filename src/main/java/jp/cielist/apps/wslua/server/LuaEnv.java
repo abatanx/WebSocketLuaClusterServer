@@ -2,6 +2,7 @@
  * WebSocket-Lua-ClusterServer
  * Copyright (C) 2017 CIEL, K.K., Interfair laboratory
  * ALL RIGHTS RESERVED.
+ *
  * @license: MIT
  **/
 
@@ -30,10 +31,15 @@ public class LuaEnv
 
 	public LuaDB luaDB;
 
-	public Globals getLua() { return luaGlobals; }
+	public Globals getLua()
+	{
+		return luaGlobals;
+	}
 
 	public LuaEnv(Session session, boolean isCleanEnv, boolean hasEvent)
 	{
+		int ID = CS.mutex.getMutexID();
+
 		//
 		this.session = session;
 
@@ -54,28 +60,30 @@ public class LuaEnv
 		core.set("Versions", versions);
 		core.set("Request", LuaValue.tableOf());
 
-		if( hasEvent )
+		if (hasEvent)
 		{
 			// Callback to sharedLuaEnv only.
 			LuaValue events = LuaValue.tableOf();
-			events.set("OnSessionChanged", LuaValue.NIL );
-			events.set("OnSessionJoin", LuaValue.NIL );
-			events.set("OnSessionLeave", LuaValue.NIL );
-			events.set("OnHubStart", LuaValue.NIL );
-			events.set("OnHubEnd", LuaValue.NIL );
-			events.set("OnHubSessionJoin", LuaValue.NIL );
-			events.set("OnHubSessionLeave", LuaValue.NIL );
+			events.set("OnSessionChanged", LuaValue.NIL);
+			events.set("OnSessionJoin", LuaValue.NIL);
+			events.set("OnSessionLeave", LuaValue.NIL);
+			events.set("OnHubStart", LuaValue.NIL);
+			events.set("OnHubEnd", LuaValue.NIL);
+			events.set("OnHubSessionJoin", LuaValue.NIL);
+			events.set("OnHubSessionLeave", LuaValue.NIL);
 			core.set("Events", events);
 		}
 
-		core.set("Log",       (new LuaLog()).call());
-		core.set("Crypt",     (new LuaCrypt()).call());
-		core.set("DB",        (luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call());
-		core.set("WebSocket", (new LuaWebSocket(session)).call());
-		core.set("Hubs",      (new LuaHubs()).call());
-		core.set("Timer",     (new LuaTimer()).call());
-		core.set("JSON",      (new LuaJSON()).call());
+		core.set("Log", (new LuaLog()).call());
+		core.set("Crypt", (new LuaCrypt()).call());
+		core.set("DB", (luaDB = new LuaDB(CSConfig.settings.dbDsn, CSConfig.settings.dbUser, CSConfig.settings.dbPassword)).call());
+		core.set("WebSocket", (new LuaWebSocket(session, ID)).call());
+		core.set("Hubs", (new LuaHubs()).call());
+		core.set("Timer", (new LuaTimer()).call());
+		core.set("JSON", (new LuaJSON()).call());
 		core.set("StringUtils", (new LuaStringUtils()).call());
+		core.set("Server", (new LuaServer()).call());
+		core.set("ID", LuaValue.valueOf(ID));
 
 		luaGlobals.set("Core", core);
 
@@ -85,7 +93,7 @@ public class LuaEnv
 		String endLuaFilename = CSConfig.settings.luaDir + "end.lua";
 		try
 		{
-			if( !isCleanEnv )
+			if (!isCleanEnv)
 			{
 				initChunk = luaGlobals.loadfile(initLuaFilename);
 				startChunk = luaGlobals.loadfile(startLuaFilename);
@@ -100,16 +108,16 @@ public class LuaEnv
 				endChunk = LuaValue.NIL;
 			}
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			Log.error(e.getMessage());
 			try
 			{
 				String p = "null";
-				if( session != null ) session.getRemote().sendString(p);
+				if (session != null) session.getRemote().sendString(p);
 				Log.sendLog(p);
 			}
-			catch(IOException ei)
+			catch (IOException ei)
 			{
 				Log.debug("Fatal connection error, %s", ei.getMessage());
 			}
@@ -122,20 +130,20 @@ public class LuaEnv
 		try
 		{
 			LuaValue chunk = luaGlobals.loadfile(CSConfig.settings.luaDir + luaFileName);
-			if( startChunk != LuaValue.NIL ) startChunk.call();
+			if (startChunk != LuaValue.NIL) startChunk.call();
 			chunk.call();
-			if( endChunk != LuaValue.NIL ) endChunk.call();
+			if (endChunk != LuaValue.NIL) endChunk.call();
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			Log.error(e.getMessage());
 			try
 			{
 				String p = "null";
-				if( session != null ) session.getRemote().sendString(p);
+				if (session != null) session.getRemote().sendString(p);
 				Log.sendLog(p);
 			}
-			catch(IOException ei)
+			catch (IOException ei)
 			{
 				Log.error("Fatal connection error, %s", ei.getMessage());
 			}

@@ -13,6 +13,7 @@ import jp.cielist.apps.wslua.server.CSConfig;
 import jp.cielist.apps.wslua.server.CSSessionSupport;
 import jp.cielist.apps.wslua.server.DB;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.luaj.vm2.*;
 import org.luaj.vm2.lib.*;
 import org.luaj.vm2.lib.jse.CoerceJavaToLua;
@@ -27,10 +28,13 @@ public class LuaWebSocket extends ZeroArgFunction
 {
 	static public String INTERNAL_VARIABLES = "__VARS__";
 
+	private int ID;
 	private Session session;
-	public LuaWebSocket(Session session)
+
+	public LuaWebSocket(Session session, int ID)
 	{
 		Log.debug("Activating WebSocket module...");
+		this.ID = ID;
 		this.session = session;
 	}
 
@@ -55,6 +59,7 @@ public class LuaWebSocket extends ZeroArgFunction
 		public LuaValue call()
 		{
 			LuaValue library = tableOf();
+			library.set("ID", ID);
 			library.set("send", new send());
 			library.set("close", new close());
 			library.set("disconnect", new disconnect());
@@ -79,8 +84,9 @@ public class LuaWebSocket extends ZeroArgFunction
 					Log.sendLog(str);
 					session.getRemote().sendString(str);
 				}
-				catch(IOException e)
+				catch(IOException | WebSocketException e)
 				{
+					Log.error("Failed sending, %s", e.getMessage());
 					return LuaValue.valueOf(false);
 				}
 				return LuaValue.valueOf(true);
@@ -142,7 +148,8 @@ public class LuaWebSocket extends ZeroArgFunction
 		{
 			public LuaValue call(LuaValue self)
 			{
-				return LuaValue.valueOf(CSSessionSupport.getRemoteAddress(session));
+				String remoteAddress = CSSessionSupport.getRemoteAddress(session);
+				return remoteAddress != null ? LuaValue.valueOf(remoteAddress) : LuaValue.NIL;
 			}
 		}
 

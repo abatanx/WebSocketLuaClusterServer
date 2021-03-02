@@ -6,6 +6,7 @@ public class CSSessionSupport
 	public static String getRemoteAddress(Session session)
 	{
 		String remoteHostAddress = null;
+		if( !session.isOpen() ) return null;
 		if( CSConfig.settings.viaProxy ) remoteHostAddress = session.getUpgradeRequest().getHeader("X-Forwarded-For");
 		if( remoteHostAddress == null  ) remoteHostAddress = session.getRemoteAddress().getAddress().getHostAddress();
 		return remoteHostAddress;

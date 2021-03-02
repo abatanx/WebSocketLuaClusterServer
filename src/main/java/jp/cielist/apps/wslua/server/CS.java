@@ -9,6 +9,8 @@ package jp.cielist.apps.wslua.server;
 
 import jp.cielist.apps.wslua.common.Log;
 
+import jp.cielist.apps.wslua.lua.LuaLog;
+import jp.cielist.apps.wslua.lua.LuaServer;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -228,7 +230,7 @@ public class CS implements ClientManagerDelegate
 						{
 							synchronized (CS.mutex.luaLock)
 							{
-								(new LuaThread(str)).start();
+								sharedLuaEnv.getLua().load(str).invoke();
 							}
 						}
 						catch(Exception e)

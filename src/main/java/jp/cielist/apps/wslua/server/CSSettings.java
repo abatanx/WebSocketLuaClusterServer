@@ -29,8 +29,12 @@ public class CSSettings
 	public String luaBootstrapFile;
 	public String luaPackagePath;
 
+	protected Properties properties;
+
 	public CSSettings()
 	{
+		properties = new Properties();
+
 		init();
 	}
 
@@ -51,43 +55,47 @@ public class CSSettings
 		luaPackagePath = "?.lua";
 	}
 
+	public Properties getProperties()
+	{
+		return properties;
+	}
+
 	public void load(String paramFile) throws IllegalArgumentException,IOException
 	{
 		init();
 
 		// プロパティ読み込み
-		Properties property = new Properties();
-		property.load(new FileInputStream(paramFile));
+		properties.load(new FileInputStream(paramFile));
 
 		// 稼働アプリ名
-		appName = property.getProperty("app.name", "");
-		appVersion = property.getProperty("app.version", "");
+		appName = properties.getProperty("app.name", "");
+		appVersion = properties.getProperty("app.version", "");
 
 		// WS待ち受けポート番号
-		port = Integer.parseInt(property.getProperty("server.port","9988"));
-		viaProxy = Boolean.parseBoolean(property.getProperty("server.via_proxy","false"));
+		port = Integer.parseInt(properties.getProperty("server.port","9988"));
+		viaProxy = Boolean.parseBoolean(properties.getProperty("server.via_proxy","false"));
 
 		// DB接続
-		jdbcDriver = property.getProperty("jdbc.driver", "");
-		dbDsn = property.getProperty("db.dsn", "");
-		dbUser = property.getProperty("db.user", "");
-		dbPassword = property.getProperty("db.password", "");
+		jdbcDriver = properties.getProperty("jdbc.driver", "");
+		dbDsn = properties.getProperty("db.dsn", "");
+		dbUser = properties.getProperty("db.user", "");
+		dbPassword = properties.getProperty("db.password", "");
 
-		hashKey = property.getProperty("hash.key", "");
-		passwordHashKey = property.getProperty("hash.password", "");
+		hashKey = properties.getProperty("hash.key", "");
+		passwordHashKey = properties.getProperty("hash.password", "");
 
 		// Lua
-		luaDir = property.getProperty("lua.dir","");
+		luaDir = properties.getProperty("lua.dir","");
 		if( !luaDir.equals("") )
 		{
 			if( !luaDir.endsWith("/") ) luaDir = luaDir + "/";
 		}
-		luaBootstrapFile = property.getProperty("lua.bootstrap", "");
-		luaPackagePath   = property.getProperty("lua.package.path" , "?.lua");
+		luaBootstrapFile = properties.getProperty("lua.bootstrap", "");
+		luaPackagePath   = properties.getProperty("lua.package.path" , "?.lua");
 
 		// LogLevel
 		Config.LOGLEVEL = 0;
-		String logLevel = property.getProperty("log.level","INFO");
+		String logLevel = properties.getProperty("log.level","INFO");
 		for(String le : logLevel.trim().split("[,]"))
 		{
 			// INFO, NOTICE, WARNING, ERROR, FATAL, DEBUG, LUA
@@ -177,5 +185,4 @@ public class CSSettings
 	{
 		return GeneralHash(hashKey, str);
 	}
-
 }
