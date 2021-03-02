@@ -99,11 +99,12 @@
 				{
 					if( isConnect )
 					{
+						sessions = []
+						hubs = []
 						sender.ws.send(JSON.stringify({monitor:{user:'admin',password:'password'}}))
 					}
-					if( !isConnect ) setTimeout(function() { sender.connect() }, 5000)
 
-					$('.ws-state').prop({disabled:!isConnect})
+					$('.ws-state').prop({disabled:isConnect})
 				},
 				onMessage: function(sender, m)
 				{
