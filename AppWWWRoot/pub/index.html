@@ -34,7 +34,9 @@
 			</li>
 		</ul>
 		<div class="form-inline my-2 my-lg-0">
-			<input id="ws-url" class="form-control mr-sm-2 ws-state" type="text" placeholder="ws://127.0.0.1:12345/" value="ws://127.0.0.1:12345/">
+			<input id="ws-user" class="form-control mr-sm-2 ws-state" type="text" placeholder="user" value="">
+			<input id="ws-password" class="form-control mr-sm-2 ws-state" type="password" placeholder="password" value="">
+			<input id="ws-url" class="form-control mr-sm-2 ws-state" type="text" placeholder="ws://" value="ws://127.0.0.1:12345/">
 			<button id="ws-connect" class="btn btn-secondary ws-state my-2 my-sm-0">Connect</button>
 		</div>
 	</div>
@@ -86,6 +88,7 @@
 		$('#ws-connect').on('click', function()
 		{
 			let url = $('#ws-url').val()
+			let user = $('#ws-user').val(), password = $('#ws-password').val()
 			let sessions = []
 			let hubs = []
 
@@ -101,7 +104,7 @@
 					{
 						sessions = []
 						hubs = []
-						sender.ws.send(JSON.stringify({monitor:{user:'admin',password:'password'}}))
+						sender.ws.send(JSON.stringify({monitor:{user:user,password:password}}))
 					}
 
 					$('.ws-state').prop({disabled:isConnect})
