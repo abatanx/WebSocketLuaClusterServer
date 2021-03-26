@@ -73,13 +73,11 @@ public class LuaEnvHub implements HubManagerDelegate
 		luaGlobals.set("isMember", new _instance_methods_.isMember(hub));
 
 		// Callback to sharedLuaEnv only.
-		LuaValue events = LuaValue.tableOf();
-		events.set("OnClose", LuaValue.NIL );
-		events.set("OnJoin", LuaValue.NIL );
-		events.set("OnJoined", LuaValue.NIL );
-		events.set("OnLeave", LuaValue.NIL );
-		events.set("OnLeft", LuaValue.NIL );
-		core.set("Events", events);
+		luaGlobals.set("OnClose", LuaValue.NIL );
+		luaGlobals.set("OnJoin", LuaValue.NIL );
+		luaGlobals.set("OnJoined", LuaValue.NIL );
+		luaGlobals.set("OnLeave", LuaValue.NIL );
+		luaGlobals.set("OnLeft", LuaValue.NIL );
 
 		// Stating hub.lua
 		String hubLuaFilename = CSConfig.settings.luaDir + "hub.lua";
@@ -96,9 +94,7 @@ public class LuaEnvHub implements HubManagerDelegate
 
 	private void invokeEvent(String eventName, Varargs v)
 	{
-		LuaValue system   = getLua().get("Core");
-		LuaValue events   = system.get("Events");
-		LuaValue callback = events.get(eventName);
+		LuaValue callback = getLua().get(eventName);
 		if( !callback.isnil() ) callback.invoke(v);
 	}
 

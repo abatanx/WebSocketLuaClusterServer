@@ -91,6 +91,10 @@
 			let user = $('#ws-user').val(), password = $('#ws-password').val()
 			let sessions = []
 			let hubs = []
+			let watchDog
+
+			edges.clear()
+			nodes.clear()
 
 			new window.WSLua.WS(url,
 			{
@@ -105,10 +109,23 @@
 						sessions = []
 						hubs = []
 						sender.ws.send(JSON.stringify({monitor:{user:user,password:password}}))
+
+						let watchDogWS = this.ws;
+						watchDog = setInterval(function()
+						{
+							if( watchDogWS.readyState === WebSocket.OPEN )
+							{
+								watchDogWS.send(JSON.stringify(null))
+							}
+						},60000);
 					}
 
 					$('.ws-state').prop({disabled:isConnect})
-					if( !isConnect ) alert('Disconnected')
+					if( !isConnect )
+					{
+						clearInterval(watchDog)
+						alert('Disconnected')
+					}
 				},
 				onMessage: function(sender, m)
 				{
