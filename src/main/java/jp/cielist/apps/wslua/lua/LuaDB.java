@@ -47,7 +47,7 @@ public class LuaDB extends ZeroArgFunction
 			}
 			catch(SQLException e)
 			{
-				Log.debug("Closing database failed, %s", e.getMessage());
+				Log.error("Closing database failed, %s", e.getMessage());
 			}
 		}
 		connections.clear();
@@ -76,6 +76,10 @@ public class LuaDB extends ZeroArgFunction
 	private static LuaTable resultSetToLuaTable(ResultSet rs, ResultSetMetaData rsmd) throws SQLException
 	{
 		LuaValue fieldName, fieldValue;
+		int vi;
+		boolean vf;
+		String vs;
+		double vd;
 
 		LuaTable columnTable = tableOf();
 		for (int i = 1; i <= rsmd.getColumnCount(); i++)
@@ -89,24 +93,24 @@ public class LuaDB extends ZeroArgFunction
 				case Types.BIGINT:
 				case Types.DECIMAL:
 				case Types.NUMERIC:
-					fieldValue = LuaValue.valueOf(rs.getInt(i));
-					if (rs.wasNull()) fieldValue = LuaValue.NIL;
+					vi = rs.getInt(i);
+					fieldValue = !rs.wasNull() ? LuaValue.valueOf(vi) : LuaValue.NIL;
 					break;
 
 				case Types.BOOLEAN:
-					fieldValue = LuaValue.valueOf(rs.getBoolean(i));
-					if (rs.wasNull()) fieldValue = LuaValue.NIL;
+					vf = rs.getBoolean(i);
+					fieldValue = !rs.wasNull() ? LuaValue.valueOf(vf) : LuaValue.NIL;
 					break;
 
 				case Types.BIT:
-					fieldValue = LuaValue.valueOf(rs.getString(i).equals("t"));
-					if (rs.wasNull()) fieldValue = LuaValue.NIL;
+					vs = rs.getString(i);
+					fieldValue = !rs.wasNull() && vs != null ? LuaValue.valueOf(vs.equals("t")) : LuaValue.NIL;
 					break;
 
 				case Types.DOUBLE:
 				case Types.FLOAT:
-					fieldValue = LuaValue.valueOf(rs.getDouble(i));
-					if (rs.wasNull()) fieldValue = LuaValue.NIL;
+					vd = rs.getDouble(i);
+					fieldValue = !rs.wasNull() ? LuaValue.valueOf(vd) : LuaValue.NIL;
 					break;
 
 				case Types.ARRAY:
@@ -138,8 +142,8 @@ public class LuaDB extends ZeroArgFunction
 				case Types.TIMESTAMP_WITH_TIMEZONE:
 				case Types.VARBINARY:
 				case Types.VARCHAR:
-					fieldValue = LuaValue.valueOf(rs.getString(i));
-					if (rs.wasNull()) fieldValue = LuaValue.NIL;
+					vs = rs.getString(i);
+					fieldValue = !rs.wasNull() && vs != null ? LuaValue.valueOf(vs) : LuaValue.NIL;
 					break;
 
 				default:
@@ -203,6 +207,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.valueOf(false);
 				}
 			}
@@ -228,6 +233,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.valueOf(false);
 				}
 			}
@@ -252,6 +258,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (Exception e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.FALSE;
 				}
 			}
@@ -280,6 +287,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (Exception e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.FALSE;
 				}
 				return LuaValue.TRUE;
@@ -307,6 +315,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (Exception e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.NIL;
 				}
 			}
@@ -333,6 +342,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (Exception e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.NIL;
 				}
 			}
@@ -378,6 +388,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (Exception e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					return LuaValue.NIL;
 				}
 			}
@@ -394,6 +405,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					r = "";
 				}
 				return LuaValue.valueOf(r);
@@ -411,6 +423,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					r = "";
 				}
 				return LuaValue.valueOf(r);
@@ -428,6 +441,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					r = "";
 				}
 				return LuaValue.valueOf(r);
@@ -445,6 +459,7 @@ public class LuaDB extends ZeroArgFunction
 				}
 				catch (SQLException e)
 				{
+					Log.error("Database access failed: %s", e.getMessage());
 					r = "";
 				}
 				return LuaValue.valueOf(r);
