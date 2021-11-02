@@ -28,6 +28,8 @@ public class CSSettings
 	public String luaDir;
 	public String luaBootstrapFile;
 	public String luaPackagePath;
+	public String googleApplicationCredentials;
+	public boolean isEnableFirebase;
 
 	protected Properties properties;
 
@@ -53,6 +55,8 @@ public class CSSettings
 		luaDir = "";
 		luaBootstrapFile = "";
 		luaPackagePath = "?.lua";
+		googleApplicationCredentials="";
+		isEnableFirebase = false;
 	}
 
 	public Properties getProperties()
@@ -92,6 +96,9 @@ public class CSSettings
 		}
 		luaBootstrapFile = properties.getProperty("lua.bootstrap", "");
 		luaPackagePath   = properties.getProperty("lua.package.path" , "?.lua");
+
+        // google.application.credentials
+        googleApplicationCredentials = properties.getProperty("google.application.credentials","");
 
 		// LogLevel
 		Config.LOGLEVEL = 0;
@@ -139,6 +146,8 @@ public class CSSettings
 		Log.info("\tlua.dir          : %s", luaDir);
 		Log.info("\tlua.bootstrap    : %s", luaBootstrapFile);
 		Log.info("\tlua.package.path : %s", luaPackagePath);
+        Log.info("\t-------- google services");
+        Log.info("\tgoogle.application.credentials : %s", googleApplicationCredentials);
 		Log.info("\t--------");
 	}
 

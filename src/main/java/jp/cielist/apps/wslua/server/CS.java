@@ -2,11 +2,13 @@
  * WebSocket-Lua-ClusterServer
  * Copyright (C) 2017 CIEL, K.K., Interfair laboratory
  * ALL RIGHTS RESERVED.
+ *
  * @license: MIT
  **/
 
 package jp.cielist.apps.wslua.server;
 
+import com.google.auth.oauth2.GoogleCredentials;
 import jp.cielist.apps.wslua.common.Log;
 
 import jp.cielist.apps.wslua.lua.LuaLog;
@@ -20,10 +22,13 @@ import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
 import scala.tools.jline.console.ConsoleReader;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Timer;
+
+import com.google.firebase.*;
 
 public class CS implements ClientManagerDelegate
 {
@@ -35,12 +40,12 @@ public class CS implements ClientManagerDelegate
 
 	private void invokeEvent(String eventName, Varargs v)
 	{
-		LuaValue system   = sharedLuaEnv.getLua().get("Core");
-		LuaValue events   = system.get("Events");
+		LuaValue system = sharedLuaEnv.getLua().get("Core");
+		LuaValue events = system.get("Events");
 		LuaValue callback = events.get(eventName);
 		synchronized (mutex.luaLock)
 		{
-			if( !callback.isnil() ) callback.invoke(v);
+			if (!callback.isnil()) callback.invoke(v);
 		}
 	}
 
@@ -78,11 +83,11 @@ public class CS implements ClientManagerDelegate
 	public void onHubSessionJoin(Hub hub, WebSockMain ws)
 	{
 		invokeEvent("OnHubSessionJoin",
-			LuaValue.varargsOf(new LuaValue[]
-			{
-				hub.getLuaEnv().getLua(),
-				ws.getLuaEnv().getLua()
-			})
+				LuaValue.varargsOf(new LuaValue[]
+						{
+								hub.getLuaEnv().getLua(),
+								ws.getLuaEnv().getLua()
+						})
 		);
 	}
 
@@ -90,11 +95,11 @@ public class CS implements ClientManagerDelegate
 	public void onHubSessionLeave(Hub hub, WebSockMain ws)
 	{
 		invokeEvent("OnHubSessionLeave",
-			LuaValue.varargsOf(new LuaValue[]
-			{
-				hub.getLuaEnv().getLua(),
-				ws.getLuaEnv().getLua()
-			})
+				LuaValue.varargsOf(new LuaValue[]
+						{
+								hub.getLuaEnv().getLua(),
+								ws.getLuaEnv().getLua()
+						})
 		);
 	}
 
@@ -110,7 +115,7 @@ public class CS implements ClientManagerDelegate
 		hubManager = new HubManager(this);
 		timerManager = new HashSet<>();
 
-		for(int i=0; i<args.length; i++)
+		for (int i = 0; i < args.length; i++)
 		{
 			propFile = args[i];
 		}
@@ -134,23 +139,23 @@ public class CS implements ClientManagerDelegate
 			org.postgresql.Driver d = new org.postgresql.Driver();
 			Log.info("   OK, Major=%d Minor=%d", d.getMajorVersion(), d.getMinorVersion());
 		}
-		catch(Exception e)
+		catch (Exception e)
 		{
 			Log.fatal("Can't load class, %s", e.getMessage());
 			return;
 		}
 
 		Log.info("++ Creating server instance on port %d...", CSConfig.settings.port);
-		Server server = new Server( CSConfig.settings.port );
+		Server server = new Server(CSConfig.settings.port);
 
 		// Create DB connection
 		Log.info("++ Creating database connection...");
 		try
 		{
 			DB checkdb = new DB(
-				CSConfig.settings.dbDsn,
-				CSConfig.settings.dbUser,
-				CSConfig.settings.dbPassword
+					CSConfig.settings.dbDsn,
+					CSConfig.settings.dbUser,
+					CSConfig.settings.dbPassword
 			);
 			Log.debug("   OK, %s", CSConfig.settings.dbDsn);
 
@@ -158,15 +163,39 @@ public class CS implements ClientManagerDelegate
 			checkdb.query("SELECT %s;", DB.S("true"));
 			Log.info("   OK");
 		}
-		catch(SQLException e)
+		catch (SQLException e)
 		{
 			Log.error(e.getMessage());
 			return;
 		}
 
+		// Firebase
+		if (!CSConfig.settings.googleApplicationCredentials.equals(""))
+		{
+			Log.info("++ Initializing FirebaseApp ...");
+			try
+			{
+				GoogleCredentials credentials =
+						GoogleCredentials.fromStream(
+								new FileInputStream(CSConfig.settings.googleApplicationCredentials)
+						);
+				FirebaseOptions options = FirebaseOptions.builder()
+						.setCredentials(credentials)
+						.build();
+
+				FirebaseApp.initializeApp(options);
+				CSConfig.settings.isEnableFirebase = true;
+			}
+			catch (Exception e)
+			{
+				Log.error(e.getMessage());
+				return;
+			}
+		}
+
 		// bootstrap
 		sharedLuaEnv = new LuaEnv(null, true, true);
-		if( !CSConfig.settings.luaBootstrapFile.equals("") )
+		if (!CSConfig.settings.luaBootstrapFile.equals(""))
 		{
 			Log.info("++ Starting bootstrap...");
 			try
@@ -188,7 +217,7 @@ public class CS implements ClientManagerDelegate
 		// Add handler
 		Log.info("++ Adding into server handler...");
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[] { contextHandler });
+		handlers.setHandlers(new Handler[]{contextHandler});
 		server.setHandler(handlers);
 
 		try
@@ -204,18 +233,18 @@ public class CS implements ClientManagerDelegate
 		try
 		{
 			ConsoleReader con = new ConsoleReader();
-			while(true)
+			while (true)
 			{
 				try
 				{
-					String cs  = con.readLine(">>");
-					if( cs == null ) break;
+					String cs = con.readLine(">>");
+					if (cs == null) break;
 					String str = cs.trim();
 
-					if( str.equals("/stop") )
+					if (str.equals("/stop"))
 					{
 						Log.notice("Timer manager has %d timer instance(s).", timerManager.size());
-						for(Timer timer : timerManager)
+						for (Timer timer : timerManager)
 						{
 							Log.notice("Cancelling: %s", timer.toString());
 							timer.cancel();
@@ -224,7 +253,7 @@ public class CS implements ClientManagerDelegate
 						server.stop();
 						break;
 					}
-					else if( str.length() > 0 )
+					else if (str.length() > 0)
 					{
 						try
 						{
@@ -233,13 +262,13 @@ public class CS implements ClientManagerDelegate
 								sharedLuaEnv.getLua().load(str).invoke();
 							}
 						}
-						catch(Exception e)
+						catch (Exception e)
 						{
 							Log.error(e.getMessage());
 						}
 					}
 				}
-				catch(Exception e)
+				catch (Exception e)
 				{
 					Log.error(e.getMessage());
 					break;
