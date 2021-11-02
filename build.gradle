@@ -1,5 +1,10 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
+}
+
 group 'jp.cielist.apps.wslua.server'
-version '1.00'
+version '1.12.20211102.01'
 
 apply plugin: 'java'
 
@@ -8,6 +13,17 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'jp.cielist.apps.wslua.server.CS'
+    }
+}
+
+shadowJar {
+    archiveFileName = "WebSocketLuaClusterServer-all.jar"
+}
+
 
 dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.31.v20200723'
