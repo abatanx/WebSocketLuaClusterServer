@@ -19,4 +19,5 @@ dependencies {
     compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
     compile group: 'org.scala-lang', name: 'jline', version: '2.10.7'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.1'
+    implementation 'com.google.firebase:firebase-admin:8.1.0'
 }
