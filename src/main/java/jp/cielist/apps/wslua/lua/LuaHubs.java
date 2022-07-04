@@ -2,6 +2,7 @@
  * WebSocket-Lua-ClusterServer
  * Copyright (C) 2017 CIEL, K.K., Interfair laboratory
  * ALL RIGHTS RESERVED.
+ *
  * @license: MIT
  **/
 
@@ -19,28 +20,28 @@ public class LuaHubs extends ZeroArgFunction
 {
 	public LuaHubs()
 	{
-		Log.debug("Activating Hubs module...");
+		Log.debug( "Activating Hubs module..." );
 	}
 
 	public LuaValue call()
 	{
 		LuaValue library = tableOf();
-		library.set("new", new _new());
-		library.set("all", new all());
+		library.set( "new", new _new() );
+		library.set( "all", new all() );
 		return library;
 	}
 
 	static class _new extends OneArgFunction
 	{
-		public LuaValue call(LuaValue arg2)
+		public LuaValue call( LuaValue arg2 )
 		{
 			int key = arg2.toint();
-			Hub hub = CS.hubManager.get(key);
-			if (hub == null)
+			Hub hub = CS.hubManager.get( key );
+			if ( hub == null )
 			{
-				hub = new Hub(CS.hubManager.getDelegate());
+				hub = new Hub( CS.hubManager.getDelegate(), key );
 				hub.initLuaEnv();
-				CS.hubManager.add(key, hub);
+				CS.hubManager.add( key, hub );
 			}
 			return hub.getLuaEnv().getLua();
 		}
@@ -53,10 +54,10 @@ public class LuaHubs extends ZeroArgFunction
 			Hub[] hubs = CS.hubManager.hubs();
 			int i = 0;
 			LuaValue result = tableOf();
-			for( Hub hub : hubs )
+			for ( Hub hub : hubs )
 			{
-				result.set(i+1, hub.getLuaEnv().getLua());
-				i ++;
+				result.set( i + 1, hub.getLuaEnv().getLua() );
+				i++;
 			}
 			return result;
 		}

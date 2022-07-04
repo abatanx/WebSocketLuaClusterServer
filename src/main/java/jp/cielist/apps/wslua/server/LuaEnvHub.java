@@ -36,6 +36,7 @@ public class LuaEnvHub implements HubManagerDelegate
 
 	public LuaEnvHub( Hub hub )
 	{
+		// Save mutexID
 		int ID = CS.mutex.getMutexID();
 
 		// Initialize the LuaGlobals
@@ -155,7 +156,7 @@ public class LuaEnvHub implements HubManagerDelegate
 
 			public LuaValue call( LuaValue self )
 			{
-				return LuaValue.valueOf( CS.hubManager.getId( hub ) );
+				return LuaValue.valueOf( hub.getHubID() );
 			}
 		}
 
