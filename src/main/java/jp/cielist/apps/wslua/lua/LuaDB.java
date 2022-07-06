@@ -37,9 +37,25 @@ public class LuaDB extends ZeroArgFunction
 		this.connections = new ArrayList<>();
 	}
 
+	public void closeConnections()
+	{
+		Log.debug("Closing %d database connection...", connections.size());
+		for( DB db : connections )
+		{
+			try {
+				db.close();
+			}
+			catch(SQLException e)
+			{
+				Log.error("Closing database failed, %s", e.getMessage());
+			}
+		}
+	}
+
 	public void cleanup()
 	{
-		Log.debug("Cleaning up database connection...");
+		Log.debug("Cleaning up %d database connection...", connections.size());
+		closeConnections();
 		for( DB db : connections )
 		{
 			try {
@@ -176,6 +192,7 @@ public class LuaDB extends ZeroArgFunction
 			vars.db = new DB(dsn, user, password);
 
 			connections.add(vars.db);
+			Log.debug("Add database connection, total = %d", connections.size());
 
 			LuaValue library = tableOf();
 			library.set("open", new open());

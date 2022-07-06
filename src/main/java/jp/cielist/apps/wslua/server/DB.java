@@ -2,6 +2,7 @@
  * WebSocket-Lua-ClusterServer
  * Copyright (C) 2017 CIEL, K.K., Interfair laboratory
  * ALL RIGHTS RESERVED.
+ *
  * @license: MIT
  **/
 
@@ -22,7 +23,7 @@ public class DB
 
 	private String dsn, user, password;
 
-	public DB(String dsn, String user, String password)
+	public DB( String dsn, String user, String password )
 	{
 		this.dsn = dsn;
 		this.user = user;
@@ -34,107 +35,107 @@ public class DB
 
 	public void open() throws SQLException
 	{
-		Log.debug("Connecting to database...");
+		Log.debug( "Connecting to database..." );
 		connection = DriverManager.getConnection( dsn, user, password );
 	}
 
-	public ResultSet query(String format, Object... args) throws SQLException
+	public ResultSet query( String format, Object... args ) throws SQLException
 	{
 		String query;
 
-		if( statement!=null )
+		if ( statement != null )
 		{
 			statement.close();
 			statement = null;
 		}
 
-		if( connection==null ) open();
+		if ( connection == null ) open();
 
 		statement = connection.createStatement();
 
-		query = String.format(format, args);
+		query = String.format( format, args );
 
 		try
 		{
 			return statement.executeQuery( query );
 		}
-		catch(SQLException e)
+		catch ( SQLException e )
 		{
-			Log.debug("DB.query failed, %s", query);
-			Log.debug("%s", e.getMessage());
+			Log.debug( "DB.query failed, %s", query );
+			Log.debug( "%s", e.getMessage() );
 			throw e;
 		}
 	}
 
-	public boolean execute(String format, Object... args) throws SQLException
+	public boolean execute( String format, Object... args ) throws SQLException
 	{
 		String query;
 
-		if( statement!=null )
+		if ( statement != null )
 		{
 			statement.close();
 			statement = null;
 		}
 
-		if( connection==null ) open();
+		if ( connection == null ) open();
 
 		statement = connection.createStatement();
 
-		query = String.format(format, args);
+		query = String.format( format, args );
 
 		try
 		{
 			statement.execute( query );
 			return true;
 		}
-		catch(SQLException e)
+		catch ( SQLException e )
 		{
-			Log.debug("DB.execute failed, %s", query);
-			Log.debug("%s", e.getMessage());
+			Log.debug( "DB.execute failed, %s", query );
+			Log.debug( "%s", e.getMessage() );
 			throw e;
 		}
 	}
 
 	public void close() throws SQLException
 	{
-		if( connection!=null )
+		if ( connection != null )
 		{
-			Log.debug("Disconnecting from database...");
+			Log.debug( "Disconnecting from database..." );
 			connection.close();
 		}
 		connection = null;
 	}
 
-	public boolean E(String format, Object... args) throws SQLException
+	public boolean E( String format, Object... args ) throws SQLException
 	{
-		return execute(format, args);
+		return execute( format, args );
 	}
 
-	public ResultSet Q(String format, Object... args) throws SQLException
+	public ResultSet Q( String format, Object... args ) throws SQLException
 	{
-		return query(format, args);
+		return query( format, args );
 	}
 
-	public static String S(String value) throws SQLException
+	public static String S( String value ) throws SQLException
 	{
-		if( value==null ) return "null";
-		StringBuffer sb = Utils.appendEscapedLiteral(null, value, true);
+		if ( value == null ) return "null";
+		StringBuffer sb = Utils.appendEscapedLiteral( null, value, true );
 		return "'" + sb.toString() + "'";
 	}
 
-	public static String N(int value) throws SQLException
+	public static String N( int value ) throws SQLException
 	{
-		StringBuffer sb = Utils.appendEscapedLiteral(null, Integer.toString(value), true);
+		StringBuffer sb = Utils.appendEscapedLiteral( null, Integer.toString( value ), true );
 		return sb.toString();
 	}
 
-	public static String D(double value) throws SQLException
+	public static String D( double value ) throws SQLException
 	{
-		StringBuffer sb = Utils.appendEscapedLiteral(null, Double.toString(value), true);
+		StringBuffer sb = Utils.appendEscapedLiteral( null, Double.toString( value ), true );
 		return sb.toString();
 	}
 
-	public static String B(boolean value) throws SQLException
+	public static String B( boolean value ) throws SQLException
 	{
 		return value ? "true" : "false";
 	}

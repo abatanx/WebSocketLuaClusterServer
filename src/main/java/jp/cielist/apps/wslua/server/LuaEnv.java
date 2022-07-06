@@ -156,11 +156,11 @@ public class LuaEnv
 				Log.error( "Fatal connection error, %s", ei.getMessage() );
 			}
 		}
-		luaDB.cleanup();
+		luaDB.closeConnections();
 	}
 
 	synchronized void cleanup()
 	{
-
+		luaDB.cleanup();
 	}
 }
