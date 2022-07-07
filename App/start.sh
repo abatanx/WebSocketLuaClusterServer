@@ -22,7 +22,7 @@ fi
 JAVA=${JAVA_HOME}/bin/java
 JAVAOPT="-server -d64"
 
-JAR=../build/libs/WebSocketLuaClusterServer-all.jar
+JAR=../out/artifacts/WebSocketLuaClusterServer_main_jar/WebSocketLuaClusterServer.main.jar
 
 echo "JVM: ${JAVA} ${JAVAOPT} -jar ${JAR} ${PROPFILE}"
 ${JAVA} ${JAVAOPT} -jar ${JAR} ${PROPFILE}
