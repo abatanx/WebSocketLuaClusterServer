@@ -54,6 +54,7 @@ public class DB
 		statement = connection.createStatement();
 
 		query = String.format( format, args );
+		Log.debug("Execute by Q:\n%s", query);
 
 		try
 		{
@@ -82,6 +83,7 @@ public class DB
 		statement = connection.createStatement();
 
 		query = String.format( format, args );
+		Log.debug("Execute by E:\n%s", query);
 
 		try
 		{
