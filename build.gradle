@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'jp.cielist.apps.wslua.server'
-version '1.12.20211102.01'
+version '1.15.20220707.01'
 
 apply plugin: 'java'
 

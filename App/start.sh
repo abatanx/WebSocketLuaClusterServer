@@ -4,7 +4,7 @@
 # Start-up script
 ###
 
-cd `dirname $0`
+cd $(dirname $0)
 
 if [ "$JAVA_HOME" = "" ]
 then
@@ -22,7 +22,7 @@ fi
 JAVA=${JAVA_HOME}/bin/java
 JAVAOPT="-server -d64"
 
-JAR=../out/artifacts/WebSocketLuaClusterServer_main_jar/WebSocketLuaClusterServer.main.jar
+JAR=../build/libs/WebSocketLuaClusterServer-all.jar
 
 echo "JVM: ${JAVA} ${JAVAOPT} -jar ${JAR} ${PROPFILE}"
 ${JAVA} ${JAVAOPT} -jar ${JAR} ${PROPFILE}
