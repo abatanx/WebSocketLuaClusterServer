@@ -11,6 +11,7 @@ import jp.cielist.apps.wslua.common.Log;
 import jp.cielist.apps.wslua.lua.JSONStringToProtocol;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
+import org.luaj.vm2.LuaValue;
 
 import java.io.IOException;
 
@@ -58,16 +59,19 @@ public class WebSockMain
 				String execute = null;
 
 				JSONStringToProtocol jsonLua = new JSONStringToProtocol(message);
+				LuaValue data = LuaValue.NIL;
 
 				if( CSConfig.settings.jsonKey == null )
 				{
 					// {"exec":{}} pattern
 					execute = jsonLua.getRootKey();
+					data = jsonLua.getRootValue();
 				}
 				else
 				{
 					// {"id":"exec",{}} pattern
 					execute = jsonLua.getLuaValue().get( CSConfig.settings.jsonKey ).toString();
+					data = jsonLua.getLuaValue();
 				}
 
 				if( execute != null )
@@ -75,7 +79,7 @@ public class WebSockMain
 					if (execute.matches("^[_0-9A-Za-z]+$"))
 					{
 						String fileName = "_" + execute.toLowerCase() + ".lua";
-						lua.run(fileName, jsonLua.getRootValue());
+						lua.run(fileName, data);
 					}
 				}
 				else
