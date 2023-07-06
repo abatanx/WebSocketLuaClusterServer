@@ -55,16 +55,32 @@ public class WebSockMain
 			Log.receiveLog(message);
 			try
 			{
+				String execute = null;
+
 				JSONStringToProtocol jsonLua = new JSONStringToProtocol(message);
 
-				String rootKey = jsonLua.getRootKey();
-				if (rootKey != null)
+				if( CSConfig.settings.jsonKey == null )
 				{
-					if (rootKey.matches("^[_0-9A-Za-z]+$"))
+					// {"exec":{}} pattern
+					execute = jsonLua.getRootKey();
+				}
+				else
+				{
+					// {"id":"exec",{}} pattern
+					execute = jsonLua.getLuaValue().get( CSConfig.settings.jsonKey ).toString();
+				}
+
+				if( execute != null )
+				{
+					if (execute.matches("^[_0-9A-Za-z]+$"))
 					{
-						String fileName = "_" + rootKey.toLowerCase() + ".lua";
+						String fileName = "_" + execute.toLowerCase() + ".lua";
 						lua.run(fileName, jsonLua.getRootValue());
 					}
+				}
+				else
+				{
+					Log.warning( "Unsupported JSON payload, %s", message);
 				}
 			}
 			catch (IOException e)

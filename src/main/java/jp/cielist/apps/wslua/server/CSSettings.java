@@ -2,6 +2,7 @@
  * WebSocket-Lua-ClusterServer
  * Copyright (C) 2017 CIEL, K.K., Interfair laboratory
  * ALL RIGHTS RESERVED.
+ *
  * @license: MIT
  **/
 
@@ -28,6 +29,7 @@ public class CSSettings
 	public String luaDir;
 	public String luaBootstrapFile;
 	public String luaPackagePath;
+	public String jsonKey;
 	public String googleApplicationCredentials;
 	public boolean isEnableFirebase;
 
@@ -55,7 +57,8 @@ public class CSSettings
 		luaDir = "";
 		luaBootstrapFile = "";
 		luaPackagePath = "?.lua";
-		googleApplicationCredentials="";
+		jsonKey = "";
+		googleApplicationCredentials = "";
 		isEnableFirebase = false;
 	}
 
@@ -64,120 +67,147 @@ public class CSSettings
 		return properties;
 	}
 
-	public void load(String paramFile) throws IllegalArgumentException,IOException
+	public void load( String paramFile ) throws IllegalArgumentException, IOException
 	{
 		init();
 
 		// プロパティ読み込み
-		properties.load(new FileInputStream(paramFile));
+		properties.load( new FileInputStream( paramFile ) );
 
 		// 稼働アプリ名
-		appName = properties.getProperty("app.name", "");
-		appVersion = properties.getProperty("app.version", "");
+		appName = properties.getProperty( "app.name", "" );
+		appVersion = properties.getProperty( "app.version", "" );
 
 		// WS待ち受けポート番号
-		port = Integer.parseInt(properties.getProperty("server.port","9988"));
-		viaProxy = Boolean.parseBoolean(properties.getProperty("server.via_proxy","false"));
+		port = Integer.parseInt( properties.getProperty( "server.port", "9988" ) );
+		viaProxy = Boolean.parseBoolean( properties.getProperty( "server.via_proxy", "false" ) );
 
 		// DB接続
-		jdbcDriver = properties.getProperty("jdbc.driver", "");
-		dbDsn = properties.getProperty("db.dsn", "");
-		dbUser = properties.getProperty("db.user", "");
-		dbPassword = properties.getProperty("db.password", "");
+		jdbcDriver = properties.getProperty( "jdbc.driver", "" );
+		dbDsn = properties.getProperty( "db.dsn", "" );
+		dbUser = properties.getProperty( "db.user", "" );
+		dbPassword = properties.getProperty( "db.password", "" );
 
-		hashKey = properties.getProperty("hash.key", "");
-		passwordHashKey = properties.getProperty("hash.password", "");
+		hashKey = properties.getProperty( "hash.key", "" );
+		passwordHashKey = properties.getProperty( "hash.password", "" );
 
 		// Lua
-		luaDir = properties.getProperty("lua.dir","");
-		if( !luaDir.equals("") )
+		luaDir = properties.getProperty( "lua.dir", "" );
+		if ( !luaDir.equals( "" ) )
 		{
-			if( !luaDir.endsWith("/") ) luaDir = luaDir + "/";
+			if ( !luaDir.endsWith( "/" ) ) luaDir = luaDir + "/";
 		}
-		luaBootstrapFile = properties.getProperty("lua.bootstrap", "");
-		luaPackagePath   = properties.getProperty("lua.package.path" , "?.lua");
+		luaBootstrapFile = properties.getProperty( "lua.bootstrap", "" );
+		luaPackagePath = properties.getProperty( "lua.package.path", "?.lua" );
 
-        // google.application.credentials
-        googleApplicationCredentials = properties.getProperty("google.application.credentials","");
+		// Json Format
+		jsonKey = properties.getProperty( "json.key", "" );
+		if( jsonKey.equals( "" ) ) jsonKey = null;
+
+		// google.application.credentials
+		googleApplicationCredentials = properties.getProperty( "google.application.credentials", "" );
 
 		// LogLevel
 		Config.LOGLEVEL = 0;
-		String logLevel = properties.getProperty("log.level","INFO");
-		for(String le : logLevel.trim().split("[,]"))
+		String logLevel = properties.getProperty( "log.level", "INFO" );
+		for ( String le : logLevel.trim().split( "[,]" ) )
 		{
 			// INFO, NOTICE, WARNING, ERROR, FATAL, DEBUG, LUA
 			le = le.trim();
-			if     ( le.equalsIgnoreCase("INFO") )    Config.LOGLEVEL |= Log.LOGTYPE_INFO;
-			else if( le.equalsIgnoreCase("NOTICE") )  Config.LOGLEVEL |= Log.LOGTYPE_NOTICE;
-			else if( le.equalsIgnoreCase("WARNING") ) Config.LOGLEVEL |= Log.LOGTYPE_WARNING;
-			else if( le.equalsIgnoreCase("ERROR") )   Config.LOGLEVEL |= Log.LOGTYPE_ERROR;
-			else if( le.equalsIgnoreCase("FATAL") )   Config.LOGLEVEL |= Log.LOGTYPE_FATAL;
-			else if( le.equalsIgnoreCase("DEBUG") )   Config.LOGLEVEL |= Log.LOGTYPE_DEBUG;
-			else if( le.equalsIgnoreCase("LUA") )     Config.LOGLEVEL |= Log.LOGTYPE_LUA;
-			else if( le.equalsIgnoreCase("ALL") )     Config.LOGLEVEL |= Log.LOGTYPE_ALL;
+			if ( le.equalsIgnoreCase( "INFO" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_INFO;
+			}
+			else if ( le.equalsIgnoreCase( "NOTICE" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_NOTICE;
+			}
+			else if ( le.equalsIgnoreCase( "WARNING" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_WARNING;
+			}
+			else if ( le.equalsIgnoreCase( "ERROR" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_ERROR;
+			}
+			else if ( le.equalsIgnoreCase( "FATAL" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_FATAL;
+			}
+			else if ( le.equalsIgnoreCase( "DEBUG" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_DEBUG;
+			}
+			else if ( le.equalsIgnoreCase( "LUA" ) )
+			{
+				Config.LOGLEVEL |= Log.LOGTYPE_LUA;
+			}
+			else if ( le.equalsIgnoreCase( "ALL" ) ) Config.LOGLEVEL |= Log.LOGTYPE_ALL;
 		}
 
 		description();
 	}
 
-	private String hiddenString(String value)
+	private String hiddenString( String value )
 	{
 		String pw = "";
-		for(int i=0; i<value.length(); i++) pw = pw + "*";
+		for ( int i = 0 ; i < value.length() ; i++ ) pw = pw + "*";
 		return pw;
 	}
 
 	public void description()
 	{
-		Log.info("\t-------- app");
-		Log.info("\tapp.name         : %s", appName);
-		Log.info("\tapp.version      : %s", appVersion);
-		Log.info("\tserver.port      : %d", port);
-		Log.info("\tserver.via_proxy : %s", viaProxy ? "true (Support to X-Forwarded-For)" : "false" );
-		Log.info("\t-------- LuaDB");
-		Log.info("\tjdbc.driver      : %s", jdbcDriver);
-		Log.info("\tdb.dsn           : %s", dbDsn);
-		Log.info("\tdb.user          : %s", dbUser);
-		Log.info("\tdb.password      : %s", hiddenString(dbPassword));
-		Log.info("\t-------- secrets");
-		Log.info("\thash.key         : %s", hiddenString(hashKey));
-		Log.info("\thash.password    : %s", hiddenString(passwordHashKey));
-		Log.info("\t-------- lua");
-		Log.info("\tlua.dir          : %s", luaDir);
-		Log.info("\tlua.bootstrap    : %s", luaBootstrapFile);
-		Log.info("\tlua.package.path : %s", luaPackagePath);
-        Log.info("\t-------- google services");
-        Log.info("\tgoogle.application.credentials : %s", googleApplicationCredentials);
-		Log.info("\t--------");
+		Log.info( "\t-------- app" );
+		Log.info( "\tapp.name         : %s", appName );
+		Log.info( "\tapp.version      : %s", appVersion );
+		Log.info( "\tserver.port      : %d", port );
+		Log.info( "\tserver.via_proxy : %s", viaProxy ? "true (Support to X-Forwarded-For)" : "false" );
+		Log.info( "\t-------- LuaDB" );
+		Log.info( "\tjdbc.driver      : %s", jdbcDriver );
+		Log.info( "\tdb.dsn           : %s", dbDsn );
+		Log.info( "\tdb.user          : %s", dbUser );
+		Log.info( "\tdb.password      : %s", hiddenString( dbPassword ) );
+		Log.info( "\t-------- secrets" );
+		Log.info( "\thash.key         : %s", hiddenString( hashKey ) );
+		Log.info( "\thash.password    : %s", hiddenString( passwordHashKey ) );
+		Log.info( "\t-------- lua" );
+		Log.info( "\tlua.dir          : %s", luaDir );
+		Log.info( "\tlua.bootstrap    : %s", luaBootstrapFile );
+		Log.info( "\tlua.package.path : %s", luaPackagePath );
+		Log.info( "\t-------- json" );
+		Log.info( "\tjson.key         : %s", jsonKey != null ? jsonKey : "<root key>" );
+		Log.info( "\t-------- google services" );
+		Log.info( "\tgoogle.application.credentials : %s", googleApplicationCredentials );
+		Log.info( "\t--------" );
 	}
 
-	final static String GeneralHash(String hashKey, String str)
+	final static String GeneralHash( String hashKey, String str )
 	{
 		String algo = "HmacSHA256";
 		StringBuilder sb;
 		try
 		{
-			SecretKeySpec sk = new SecretKeySpec(hashKey.getBytes(), algo);
-			Mac mac = Mac.getInstance(algo);
-			mac.init(sk);
+			SecretKeySpec sk = new SecretKeySpec( hashKey.getBytes(), algo );
+			Mac mac = Mac.getInstance( algo );
+			mac.init( sk );
 
-			byte[] mac_bytes = mac.doFinal(str.getBytes());
+			byte[] mac_bytes = mac.doFinal( str.getBytes() );
 
-			sb = new StringBuilder(2 * mac_bytes.length);
-			for(byte b: mac_bytes)
+			sb = new StringBuilder( 2 * mac_bytes.length );
+			for ( byte b : mac_bytes )
 			{
-				sb.append(String.format("%02x", b&0xff) );
+				sb.append( String.format( "%02x", b & 0xff ) );
 			}
 		}
-		catch (NoSuchAlgorithmException e)
+		catch ( NoSuchAlgorithmException e )
 		{
-			Log.debug("Crypto error: %s", e.getMessage());
+			Log.debug( "Crypto error: %s", e.getMessage() );
 			e.printStackTrace();
 			return "";
 		}
-		catch (InvalidKeyException e)
+		catch ( InvalidKeyException e )
 		{
-			Log.debug("Crypto error: %s", e.getMessage());
+			Log.debug( "Crypto error: %s", e.getMessage() );
 			e.printStackTrace();
 			return "";
 		}
@@ -185,13 +215,13 @@ public class CSSettings
 		return sb.toString();
 	}
 
-	public String passwordHash(String str)
+	public String passwordHash( String str )
 	{
-		return GeneralHash(passwordHashKey, str);
+		return GeneralHash( passwordHashKey, str );
 	}
 
-	public String hash(String str)
+	public String hash( String str )
 	{
-		return GeneralHash(hashKey, str);
+		return GeneralHash( hashKey, str );
 	}
 }
